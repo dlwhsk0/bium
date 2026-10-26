@@ -35,7 +35,8 @@
 - `src/lib/categories.ts` — 분류 4종(라벨·대표 아이콘·랜덤용 이모지 목록)
 - `src/lib/date.ts` — 날짜 키·일수(시작일 포함)·표기
 - `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순). 저장이 막혀도 앱은 동작
-- `src/screens/` — `Home`(이름 입력 + 시작 + 지난 비움), `Active`(분류 버튼·되돌리기·비움 끝은 두 번 눌러 확정. 누를 때마다 `randomEmoji`로 고른 이모지가 `drop-zone`에서 떨어지고, `animationend`에 제거 + 쓰레기통 흔들림), `Result`(통계)
+- `src/screens/` — `Home`(이름 입력 + 시작 + 지난 비움), `Active`(분류 버튼·되돌리기·비움 끝은 두 번 눌러 확정. 누를 때마다 `randomEmoji`로 고른 이모지가 `drop-zone`에서 떨어지고, `animationend`에 제거 + 쓰레기통 흔들림), `Result`(통계 + 기록 삭제)
+- `src/lib/useTwoStep.ts` — 되돌릴 수 없는 버튼(비움 끝·기록 삭제)용 "3초 안에 두 번 눌러 확정" 훅
 - `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
 
 ## ⚠️ pnpm 네이티브 바이너리
@@ -47,7 +48,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 0: 스캐폴딩 + CLAUDE.md
 - [x] 단계 1: 화면 골격 (시작 → 비우는 중 → 통계) + 분류별 카운트 + localStorage 저장(며칠 이어가기)
 - [x] 단계 2: 분류별 이모지 세트 + 랜덤 선택 + 쓰레기통 낙하 애니메이션
-- [ ] 단계 3: 통계 화면 + 지난 비움 기록 목록
+- [x] 단계 3: 통계 화면 + 지난 비움 기록 목록(열어보기·두 번 눌러 삭제)
 - [ ] 단계 4: 모바일 다듬기 + 배포
 
 ## 컨벤션

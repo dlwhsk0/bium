@@ -32,7 +32,18 @@ export default function App() {
   }
 
   const opened = view.kind === 'result' ? history.find((b) => b.id === view.id) : undefined
-  if (opened) return <Result bium={opened} onClose={() => setView({ kind: 'home' })} />
+  if (opened) {
+    return (
+      <Result
+        bium={opened}
+        onClose={() => setView({ kind: 'home' })}
+        onDelete={() => {
+          setHistory((h) => h.filter((b) => b.id !== opened.id))
+          setView({ kind: 'home' })
+        }}
+      />
+    )
+  }
 
   return (
     <Home

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { periodLabel, summarize, type Bium } from '../lib/bium'
 import { CATEGORIES, randomEmoji, type CategoryKey } from '../lib/categories'
+import { useTwoStep } from '../lib/useTwoStep'
 
 /** 화면에서 떨어지는 중인 이모지 하나. 쓰레기통에 닿으면 사라진다. */
 interface Drop {
@@ -23,14 +24,8 @@ interface Props {
 
 export function Active({ bium, onToss, onUndo, onFinish }: Props) {
   const stats = summarize(bium)
-  // 실수로 끝내지 않게 두 번 눌러야 끝난다. 3초 안에 다시 안 누르면 원래대로.
-  const [confirming, setConfirming] = useState(false)
-
-  useEffect(() => {
-    if (!confirming) return
-    const t = setTimeout(() => setConfirming(false), 3000)
-    return () => clearTimeout(t)
-  }, [confirming])
+  // 실수로 끝내지 않게 두 번 눌러야 끝난다
+  const finishButton = useTwoStep(onFinish)
 
   const [drops, setDrops] = useState<Drop[]>([])
   const nextDropId = useRef(0)
@@ -90,10 +85,10 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
       </section>
 
       <button
-        className={confirming ? 'finish confirming' : 'finish'}
-        onClick={() => (confirming ? onFinish() : setConfirming(true))}
+        className={finishButton.confirming ? 'finish confirming' : 'finish'}
+        onClick={finishButton.press}
       >
-        {confirming ? '한 번 더 누르면 끝나요' : '비움 끝'}
+        {finishButton.confirming ? '한 번 더 누르면 끝나요' : '비움 끝'}
       </button>
     </main>
   )
