@@ -9,9 +9,10 @@ interface Props {
   onExport: () => void
   onImport: (file: File) => void
   onIntro: () => void
+  onEditCategories: () => void
 }
 
-export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro }: Props) {
+export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
 
   return (
@@ -48,15 +49,20 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport, onI
             {notice}
           </p>
         )}
-        <div className="backup">
+        <div className="text-buttons">
+          <button className="text-button" onClick={onEditCategories}>
+            카테고리 편집
+          </button>
+          <button className="text-button" onClick={onIntro}>
+            앱 소개
+          </button>
+        </div>
+        <div className="text-buttons">
           <button className="text-button" onClick={onExport} disabled={history.length === 0}>
             백업 파일 저장
           </button>
           <button className="text-button" onClick={() => fileInput.current?.click()}>
             백업 불러오기
-          </button>
-          <button className="text-button" onClick={onIntro}>
-            앱 소개
           </button>
           <input
             ref={fileInput}

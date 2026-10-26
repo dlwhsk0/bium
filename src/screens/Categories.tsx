@@ -1,0 +1,128 @@
+import { useState } from 'react'
+import {
+  MAX_CATEGORIES,
+  MAX_LABEL,
+  MIN_CATEGORIES,
+  addCategory,
+  hideCategory,
+  updateCategory,
+  visibleCategories,
+  type Category,
+} from '../lib/categories'
+import { PACKS, getPack, iconUrl, type PackKey } from '../lib/packs'
+import { useTwoStep } from '../lib/useTwoStep'
+
+interface Props {
+  categories: Category[]
+  /** 바꿀 때마다 바로 저장된다 */
+  onChange: (list: Category[]) => void
+  onDone: () => void
+}
+
+function DeleteButton({ disabled, onDelete }: { disabled: boolean; onDelete: () => void }) {
+  const button = useTwoStep(onDelete)
+  return (
+    <button
+      className={button.confirming ? 'delete-button confirming' : 'delete-button'}
+      onClick={button.press}
+      disabled={disabled}
+    >
+      {button.confirming ? '한 번 더' : '삭제'}
+    </button>
+  )
+}
+
+export function Categories({ categories, onChange, onDone }: Props) {
+  const visible = visibleCategories(categories)
+  // 아이템팩 고르는 칸이 펼쳐진 카테고리
+  const [picking, setPicking] = useState<string | null>(null)
+
+  function choosePack(c: Category, pack: PackKey) {
+    // 이름을 따로 안 바꿨으면(팩 이름 그대로면) 이름도 새 팩 이름으로
+    const label = c.label === getPack(c.pack).name ? getPack(pack).name : c.label
+    onChange(updateCategory(categories, c.id, { pack, label }))
+    setPicking(null)
+  }
+
+  function add() {
+    // 아직 안 쓰는 팩 중 첫 번째로 만들고 바로 팩 고르기를 연다
+    const used = new Set(visible.map((c) => c.pack))
+    const pack = PACKS.find((p) => !used.has(p.key))?.key ?? 'goods'
+    const next = addCategory(categories, pack)
+    onChange(next)
+    setPicking(next[next.length - 1].id)
+  }
+
+  return (
+    <main className="screen categories">
+      <header className="summary">
+        <h1 className="title">카테고리 편집</h1>
+        <p className="body">
+          버릴 물건을 나눌 칸이에요.
+          <br />
+          {MIN_CATEGORIES}개부터 {MAX_CATEGORIES}개까지 둘 수 있어요.
+        </p>
+      </header>
+
+      <ul className="card edit-list">
+        {visible.map((c) => (
+          <li key={c.id} className="edit-item">
+            <div className="edit-row">
+              <button
+                className={picking === c.id ? 'pack-thumb open' : 'pack-thumb'}
+                onClick={() => setPicking(picking === c.id ? null : c.id)}
+                aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
+                aria-expanded={picking === c.id}
+              >
+                <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+              </button>
+              <input
+                className="label-input"
+                value={c.label}
+                maxLength={MAX_LABEL}
+                placeholder={getPack(c.pack).name}
+                aria-label="카테고리 이름"
+                onChange={(e) => onChange(updateCategory(categories, c.id, { label: e.target.value }))}
+                onBlur={(e) => {
+                  if (!e.target.value.trim()) onChange(updateCategory(categories, c.id, { label: getPack(c.pack).name }))
+                }}
+              />
+              <DeleteButton disabled={visible.length <= MIN_CATEGORIES} onDelete={() => onChange(hideCategory(categories, c.id))} />
+            </div>
+
+            {picking === c.id && (
+              <div className="pack-grid" role="radiogroup" aria-label="아이템팩">
+                {PACKS.map((p) => (
+                  <button
+                    key={p.key}
+                    role="radio"
+                    aria-checked={p.key === c.pack}
+                    className={p.key === c.pack ? 'pack-option selected' : 'pack-option'}
+                    onClick={() => choosePack(c, p.key)}
+                  >
+                    <span className="pack-icons">
+                      {p.icons.slice(0, 3).map((slug) => (
+                        <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
+                      ))}
+                    </span>
+                    <span className="pack-name">{p.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <button className="text-button" onClick={add} disabled={visible.length >= MAX_CATEGORIES}>
+        {visible.length >= MAX_CATEGORIES ? `카테고리는 ${MAX_CATEGORIES}개까지예요` : '카테고리 추가'}
+      </button>
+
+      <footer className="actions">
+        <button className="cta" onClick={onDone}>
+          완료
+        </button>
+      </footer>
+    </main>
+  )
+}

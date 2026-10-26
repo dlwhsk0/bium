@@ -1,14 +1,15 @@
 import type { CSSProperties } from 'react'
 import type { Toss } from '../lib/bium'
-import { CATEGORIES, iconFor, seeded, type CategoryKey } from '../lib/categories'
+import { labelOf, type Category } from '../lib/categories'
+import { iconFor, seeded } from '../lib/packs'
 import { ROW_H, slot } from '../lib/pile'
 
 /** 더미로 보여주는 최대 개수. 넘으면 개수만 오르고, 새로 넣은 건 더미 꼭대기에서 사라진다. */
 const MAX_PILE = 25
 
 interface Props {
-  category: CategoryKey
-  /** 이 분류의 버리기 기록, 오래된 순 */
+  category: Category
+  /** 이 카테고리의 버리기 기록, 오래된 순 */
   tosses: Toss[]
   /** 이 시각 이후에 버린 것만 떨어지는 애니메이션을 한다 (처음 열 때 다 떨어지지 않게) */
   animateAfter?: number
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export function Bin({ category, tosses, animateAfter = Infinity, onToss }: Props) {
-  const { label } = CATEGORIES.find((c) => c.key === category)!
+  const label = labelOf(category)
   const pile = tosses.slice(0, MAX_PILE)
   const last = tosses.at(-1)
   const overflowDrop = last && tosses.length > MAX_PILE && last.at > animateAfter ? last : null
@@ -43,7 +44,7 @@ export function Bin({ category, tosses, animateAfter = Infinity, onToss }: Props
             <img
               key={t.at}
               className={t.at > animateAfter ? 'item falling' : 'item'}
-              src={iconFor(category, t.at)}
+              src={iconFor(category.pack, t.at)}
               alt=""
               style={style}
               draggable={false}
@@ -54,7 +55,7 @@ export function Bin({ category, tosses, animateAfter = Infinity, onToss }: Props
           <img
             key={overflowDrop.at}
             className="item vanishing"
-            src={iconFor(category, overflowDrop.at)}
+            src={iconFor(category.pack, overflowDrop.at)}
             alt=""
             style={{ left: '50%', bottom: `${slot(MAX_PILE - 1).row * ROW_H}px` }}
             draggable={false}

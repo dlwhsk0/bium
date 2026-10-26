@@ -1,4 +1,5 @@
 import type { Bium } from './bium'
+import { DEFAULT_CATEGORIES, MIN_CATEGORIES, readCategory, visibleCategories, type Category } from './categories'
 
 const ACTIVE_KEY = 'bium:active'
 const HISTORY_KEY = 'bium:history'
@@ -33,3 +34,16 @@ const ONBOARDED_KEY = 'bium:onboarded'
 /** 처음 소개 화면을 이미 봤는지 */
 export const loadOnboarded = () => read<boolean>(ONBOARDED_KEY, false)
 export const saveOnboarded = () => write(ONBOARDED_KEY, true)
+
+const CATEGORIES_KEY = 'bium:categories'
+
+/** 저장된 카테고리. 없거나 깨졌거나 보이는 게 너무 적으면 기본값. */
+export function loadCategories(): Category[] {
+  const raw = read<unknown>(CATEGORIES_KEY, null)
+  if (!Array.isArray(raw)) return DEFAULT_CATEGORIES
+  const list = raw.map(readCategory)
+  if (list.includes(null)) return DEFAULT_CATEGORIES
+  const ok = list as Category[]
+  return visibleCategories(ok).length >= MIN_CATEGORIES ? ok : DEFAULT_CATEGORIES
+}
+export const saveCategories = (list: Category[]) => write(CATEGORIES_KEY, list)

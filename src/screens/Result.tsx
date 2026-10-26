@@ -1,16 +1,23 @@
 import { periodLabel, summarize, type Bium } from '../lib/bium'
-import { CATEGORIES } from '../lib/categories'
+import { categoryOf, labelOf, type Category } from '../lib/categories'
+import { getPack, iconUrl } from '../lib/packs'
 import { formatDayKey } from '../lib/date'
 import { useTwoStep } from '../lib/useTwoStep'
 
 interface Props {
   bium: Bium
+  categories: Category[]
   onClose: () => void
   onDelete: () => void
 }
 
-export function Result({ bium, onClose, onDelete }: Props) {
+export function Result({ bium, categories, onClose, onDelete }: Props) {
   const s = summarize(bium)
+  // 이 비움에서 실제로 버린 카테고리만, 카테고리 순서대로. 나중에 추가한 카테고리가 0개로 끼지 않게.
+  const order = new Map(categories.map((c, i) => [c.id, i]))
+  const shown = Object.keys(s.byCategory)
+    .map((id) => categoryOf(categories, id))
+    .sort((a, b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity))
   const deleteButton = useTwoStep(onDelete)
 
   return (
@@ -25,15 +32,17 @@ export function Result({ bium, onClose, onDelete }: Props) {
         <p className="body">{s.days}일 동안 방에서 내보냈어요</p>
       </header>
 
-      <section className="card tiles">
-        {CATEGORIES.map((c) => (
-          <div key={c.key} className="tile">
-            <img src={`/icons/${c.icons[0]}.png`} alt="" draggable={false} />
-            <span className="tile-label">{c.label}</span>
-            <span className="tile-count">{s.byCategory[c.key]}개</span>
-          </div>
-        ))}
-      </section>
+      {shown.length > 0 && (
+        <section className="card tiles">
+          {shown.map((c) => (
+            <div key={c.id} className="tile">
+              <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+              <span className="tile-label">{labelOf(c)}</span>
+              <span className="tile-count">{s.byCategory[c.id] ?? 0}개</span>
+            </div>
+          ))}
+        </section>
+      )}
 
       {s.bestDay && (
         <section className="card best">

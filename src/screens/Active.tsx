@@ -1,24 +1,26 @@
 import { useState } from 'react'
 import { periodLabel, type Bium } from '../lib/bium'
-import { CATEGORIES, type CategoryKey } from '../lib/categories'
+import { visibleCategories, type Category } from '../lib/categories'
 import { useTwoStep } from '../lib/useTwoStep'
 import { Bin } from '../components/Bin'
 
 interface Props {
   bium: Bium
-  onToss: (category: CategoryKey) => void
+  categories: Category[]
+  onToss: (categoryId: string) => void
   onUndo: () => void
   onFinish: () => void
+  onEditCategories: () => void
 }
 
-export function Active({ bium, onToss, onUndo, onFinish }: Props) {
+export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCategories }: Props) {
   // 실수로 끝내지 않게 두 번 눌러야 끝난다
   const finishButton = useTwoStep(onFinish)
   // 화면을 연 뒤에 넣은 것만 떨어지게 한다. 이미 쌓여 있던 건 그대로 둔다.
   const [openedAt] = useState(() => Date.now())
 
-  function handleToss(category: CategoryKey) {
-    onToss(category)
+  function handleToss(categoryId: string) {
+    onToss(categoryId)
     navigator.vibrate?.(12) // 안드로이드만. iOS 사파리는 미지원이라 무시된다
   }
 
@@ -33,21 +35,26 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
       </header>
 
       <section className="bins">
-        {CATEGORIES.map((c) => (
+        {visibleCategories(categories).map((c) => (
           <Bin
-            key={c.key}
-            category={c.key}
-            tosses={bium.tosses.filter((t) => t.category === c.key)}
+            key={c.id}
+            category={c}
+            tosses={bium.tosses.filter((t) => t.category === c.id)}
             animateAfter={openedAt}
-            onToss={() => handleToss(c.key)}
+            onToss={() => handleToss(c.id)}
           />
         ))}
       </section>
 
       <footer className="actions">
-        <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
-          방금 넣은 것 되돌리기
-        </button>
+        <div className="text-buttons">
+          <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
+            방금 넣은 것 되돌리기
+          </button>
+          <button className="text-button" onClick={onEditCategories}>
+            카테고리 편집
+          </button>
+        </div>
         <button
           className={finishButton.confirming ? 'cta confirming' : 'cta'}
           onClick={finishButton.press}

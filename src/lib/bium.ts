@@ -1,9 +1,9 @@
-import { emptyCounts, type CategoryKey } from './categories'
 import { dayKey, daysInclusive, formatKoreanMD } from './date'
 
 /** 버리기 1회. 날짜별 집계·되돌리기 모두 이 목록에서 계산한다. */
 export interface Toss {
-  category: CategoryKey
+  /** Category.id */
+  category: string
   at: number
 }
 
@@ -17,7 +17,8 @@ export interface Bium {
 
 export interface BiumStats {
   total: number
-  byCategory: Record<CategoryKey, number>
+  /** 카테고리 id → 개수. 하나도 안 버린 카테고리는 없을 수 있다. */
+  byCategory: Record<string, number>
   days: number
   /** 가장 많이 치운 날. 동점이면 먼저 온 날. */
   bestDay: { day: string; count: number } | null
@@ -30,7 +31,7 @@ export function startBium(now = Date.now()): Bium {
   return { id: newId(), startedAt: now, tosses: [] }
 }
 
-export function toss(b: Bium, category: CategoryKey, now = Date.now()): Bium {
+export function toss(b: Bium, category: string, now = Date.now()): Bium {
   return { ...b, tosses: [...b.tosses, { category, at: now }] }
 }
 
@@ -43,10 +44,10 @@ export function finish(b: Bium, now = Date.now()): Bium {
 }
 
 export function summarize(b: Bium, now = Date.now()): BiumStats {
-  const byCategory = emptyCounts()
+  const byCategory: Record<string, number> = {}
   const perDay = new Map<string, number>()
   for (const t of b.tosses) {
-    byCategory[t.category]++
+    byCategory[t.category] = (byCategory[t.category] ?? 0) + 1
     const key = dayKey(t.at)
     perDay.set(key, (perDay.get(key) ?? 0) + 1)
   }

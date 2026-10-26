@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Toss } from '../lib/bium'
-import { iconFor, seeded } from '../lib/categories'
+import { DEFAULT_CATEGORIES } from '../lib/categories'
+import { iconFor, seeded } from '../lib/packs'
 import { Bin } from '../components/Bin'
 import { ROW_H, slot } from '../lib/pile'
 
@@ -91,7 +92,7 @@ function TryIt() {
     <div className="ob-stage">
       <div className="ob-try">
         <Bin
-          category="trash"
+          category={DEFAULT_CATEGORIES[3]}
           tosses={tosses}
           animateAfter={openedAt}
           onToss={() => {
