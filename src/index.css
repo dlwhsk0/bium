@@ -191,22 +191,6 @@ img {
   color: var(--danger);
 }
 
-/* 화면 위쪽의 작은 보조 버튼 */
-.chip {
-  margin-top: 8px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 18px;
-  background: var(--card);
-  color: var(--text-2);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.chip:active {
-  background: var(--card-pressed);
-}
-
 /* ── 홈 ── */
 .text-buttons {
   display: flex;

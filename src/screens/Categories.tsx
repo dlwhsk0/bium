@@ -17,6 +17,8 @@ interface Props {
   /** 바꿀 때마다 바로 저장된다 */
   onChange: (list: Category[]) => void
   onDone: () => void
+  /** 카드를 꾹 눌러 들어왔으면 그 카테고리의 아이템팩 고르기를 펼친 채로 연다 */
+  focusId?: string
 }
 
 function DeleteButton({ disabled, onDelete }: { disabled: boolean; onDelete: () => void }) {
@@ -32,10 +34,10 @@ function DeleteButton({ disabled, onDelete }: { disabled: boolean; onDelete: () 
   )
 }
 
-export function Categories({ categories, onChange, onDone }: Props) {
+export function Categories({ categories, onChange, onDone, focusId }: Props) {
   const visible = visibleCategories(categories)
   // 아이템팩 고르는 칸이 펼쳐진 카테고리
-  const [picking, setPicking] = useState<string | null>(null)
+  const [picking, setPicking] = useState<string | null>(focusId ?? null)
 
   function choosePack(c: Category, pack: PackKey) {
     // 이름을 따로 안 바꿨으면(팩 이름 그대로면) 이름도 새 팩 이름으로
