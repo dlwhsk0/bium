@@ -1,41 +1,56 @@
-// 아이콘: Microsoft Fluent Emoji 3D (MIT) — public/icons/<slug>.png
-export const CATEGORIES = [
-  {
-    key: 'clothes',
-    label: '의류',
-    icons: ['tshirt', 'jeans', 'socks', 'coat', 'dress', 'cap', 'shoe', 'scarf'],
-  },
-  {
-    key: 'goods',
-    label: '소품',
-    icons: ['teddy', 'frame', 'candle', 'package', 'plant', 'books', 'clock', 'puzzle'],
-  },
-  {
-    key: 'cosmetics',
-    label: '화장품',
-    icons: ['lipstick', 'lotion', 'nailpolish', 'mirror', 'soap', 'toothbrush', 'bubbles', 'sponge'],
-  },
-  {
-    key: 'trash',
-    label: '쓰레기',
-    icons: ['cup', 'newspaper', 'banana', 'tissue', 'can', 'bottle', 'juicebox', 'paper'],
-  },
-] as const
+import { getPack, isPackKey, type PackKey } from './packs'
 
-export type CategoryKey = (typeof CATEGORIES)[number]['key']
-
-/** 0 이상 1 미만의 결정적 난수. 같은 seed면 늘 같은 값이라 새로고침해도 더미 모양이 그대로다. */
-export function seeded(seed: number): number {
-  const x = Math.sin(seed) * 10000
-  return x - Math.floor(x)
+/**
+ * 버릴 물건을 나누는 칸. 사용자가 이름과 아이템팩을 바꾸고 추가·삭제할 수 있다.
+ * 삭제하면 지우지 않고 hidden으로 숨긴다 — 그 카테고리로 버린 기록이 지난 비움에 남아 있기 때문.
+ */
+export interface Category {
+  id: string
+  label: string
+  pack: PackKey
+  hidden?: boolean
 }
 
-/** 버린 시각으로 아이콘을 고른다 — 저장하지 않아도 매번 같은 아이콘 */
-export function iconFor(key: CategoryKey, at: number): string {
-  const { icons } = CATEGORIES.find((c) => c.key === key)!
-  return `/icons/${icons[Math.floor(seeded(at) * icons.length)]}.png`
+export const MIN_CATEGORIES = 2
+export const MAX_CATEGORIES = 6
+export const MAX_LABEL = 8
+
+// 처음 기본값. id는 예전 버전의 고정 키와 같아서 옛 기록이 그대로 이어진다.
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: 'clothes', label: '의류', pack: 'clothes' },
+  { id: 'goods', label: '소품', pack: 'goods' },
+  { id: 'cosmetics', label: '화장품', pack: 'cosmetics' },
+  { id: 'trash', label: '쓰레기', pack: 'trash' },
+]
+
+export const visibleCategories = (list: Category[]) => list.filter((c) => !c.hidden)
+
+const newId = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+
+export function addCategory(list: Category[], pack: PackKey): Category[] {
+  return [...list, { id: newId(), label: getPack(pack).name, pack }]
 }
 
-export function emptyCounts(): Record<CategoryKey, number> {
-  return { clothes: 0, goods: 0, cosmetics: 0, trash: 0 }
+export function updateCategory(list: Category[], id: string, patch: Partial<Pick<Category, 'label' | 'pack'>>) {
+  return list.map((c) => (c.id === id ? { ...c, ...patch } : c))
+}
+
+export function hideCategory(list: Category[], id: string) {
+  return list.map((c) => (c.id === id ? { ...c, hidden: true } : c))
+}
+
+/** 기록에 남은 id로 카테고리를 찾는다. 어떤 이유로 없으면 '기타'로 보여준다. */
+export function categoryOf(list: Category[], id: string): Category {
+  return list.find((c) => c.id === id) ?? { id, label: '기타', pack: 'goods', hidden: true }
+}
+
+/** 이름을 비워두면 아이템팩 이름으로 채운다 */
+export const labelOf = (c: Category) => c.label.trim() || getPack(c.pack).name
+
+/** 손상됐으면 null. 저장소와 백업 파일 둘 다 이걸로 읽는다. */
+export function readCategory(v: unknown): Category | null {
+  if (typeof v !== 'object' || v === null) return null
+  const o = v as Record<string, unknown>
+  if (typeof o.id !== 'string' || typeof o.label !== 'string' || !isPackKey(o.pack)) return null
+  return { id: o.id, label: o.label.slice(0, MAX_LABEL), pack: o.pack, ...(o.hidden === true && { hidden: true }) }
 }

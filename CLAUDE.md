@@ -4,7 +4,7 @@
 
 ## 컨셉 / 흐름
 1. **비움 시작** 버튼 → 세션 시작
-2. 분류 버튼 4개: **의류 / 소품 / 화장품 / 쓰레기**
+2. 카테고리 카드(기본 **의류 / 소품 / 화장품 / 쓰레기**, 사용자가 2~6개로 편집)
    - **분리수거함 4개가 곧 버튼.** 누르면 그 분류의 3D 아이콘 하나가 위에서 떨어져 함 안에 **쌓인다** (최대 21개까지 더미로 보이고, 넘으면 개수만 오른다)
    - 해당 분류 개수 +1 (물건 이름·사진 등 상세 기록 없음, 개수만)
 3. **비움 끝** 버튼 → 세션 종료 + **통계** 표시
@@ -41,20 +41,23 @@
 
 ## 구조
 - `src/lib/bium.ts` — `Bium`/`Toss` 타입, 순수 함수(`startBium`·`toss`·`undo`·`finish`·`summarize`·`periodLabel`)
-- `src/lib/categories.ts` — 분류 4종(라벨·아이콘 slug 목록), `seeded`(결정적 난수), `iconFor`
+- `src/lib/packs.ts` — 아이템팩 11종(옷, 소품, 화장품, 쓰레기, 종이와 책, 주방, 전자기기, 장난감, 신발과 가방, 문구, 액세서리). 첫 아이콘이 대표 그림(팩끼리 겹치지 않게). `seeded`, `iconFor(pack, at)`. **기존 팩의 아이콘 순서를 바꾸면 이미 쌓인 더미 그림이 바뀐다**
+- `src/lib/categories.ts` — 사용자 카테고리 `{ id, label, pack, hidden? }`. 기본 4개의 id는 예전 고정 키(clothes 등)와 같아 옛 기록이 이어진다. 삭제는 `hidden`(지난 기록 표시용). 2~6개, 이름 8자
 - `src/lib/date.ts` — 날짜 키·일수(시작일 포함)·표기
 - `src/lib/backup.ts` — 백업 파일 만들기(`makeBackup`)·검증(`parseBackup`, 깨진 파일은 한국어 문장으로 Error)·합치기(`mergeBackup`, 같은 id는 건너뛰어 여러 번 불러와도 안전)·저장(`saveBackupFile`, 폰은 공유 시트, 그 외 다운로드)
-- `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순). 저장이 막혀도 앱은 동작
+- `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순), `bium:categories`, `bium:onboarded`. 저장이 막혀도 앱은 동작
 - `src/components/Bin.tsx` — 분류 카드 하나(누르면 넣기). 벽돌 쌓기 배치(`slot`) + 위치·기울기 흔들림은 `seeded(at)`. `animateAfter` 이후에 넣은 것만 떨어지는 애니메이션(처음 열 때 다 떨어지지 않게)
 - `src/screens/Onboarding.tsx` — 처음 열면 나오는 소개 5장(공감, 휴지 하나부터, 하나씩 금방, 직접 눌러보기, 응원). 좌우로 밀어 넘김. 마지막 버튼은 바로 비움 시작. 기록이 이미 있으면 안 나오고(`bium:onboarded`), 홈의 "앱 소개"로 다시 볼 수 있다
 - `src/lib/pile.ts` — 더미 벽돌 쌓기 배치(`slot`, `ROW_H`). `Bin`과 소개 화면이 같이 쓴다
-- `src/screens/` — `Home`(시작 + 지난 비움 + 백업·앱 소개), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
+- `src/screens/Categories.tsx` — 카테고리 편집(이름, 아이템팩 고르기, 추가, 두 번 눌러 삭제). 홈과 비우는 중 화면에서 연다. 바꿀 때마다 바로 저장
+- `src/screens/` — `Home`(시작 + 지난 비움 + 카테고리 편집·앱 소개·백업), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
 - `src/lib/useTwoStep.ts` — 되돌릴 수 없는 버튼(비움 끝·기록 삭제)용 "3초 안에 두 번 눌러 확정" 훅
 - `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
 
 ## 데이터 저장 / 백업
 - 서버 없음. 기록은 기기의 localStorage에만 있다. 시작 시 `navigator.storage.persist()`로 영구 저장을 요청(`main.tsx`).
-- 홈 하단 "백업 파일 저장 / 백업 불러오기". 파일 형식 `{ app: 'bium', version: 1, exportedAt, active, history }`. 형식을 바꾸면 version을 올리고 `parseBackup`에서 옛 버전도 받아준다.
+- 홈 하단 "백업 파일 저장 / 백업 불러오기". 파일 형식 v2 `{ app: 'bium', version: 2, exportedAt, categories, active, history }`(v1은 categories 없음 → 기본 4개로 읽음). 형식을 바꾸면 version을 올리고 `parseBackup`에서 옛 버전도 받아준다.
+- 카테고리 합치기: 기록이 없는 기기면 백업 구성을 그대로, 쓰던 기기면 지금 구성 유지 + 백업에만 있는 건 숨겨서 추가.
 - 불러오기는 **덮어쓰지 않고 합친다**. 진행 중 비움은 지금 진행 중인 게 없을 때만 백업 것을 이어 쓴다.
 
 ## 배포
@@ -77,6 +80,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 6: 리디자인 2 — 핀테크 앱 기준 카드 UI, Pretendard, 단일 포인트 색
 - [x] 단계 7: 웹앱(PWA) + 영구 저장 요청 + 백업 파일 저장·불러오기
 - [x] 단계 8: 처음 소개(온보딩) 5장 — 바쁜 학생·직장인, 휴지 하나부터, 하나씩 금방, 재미, 응원
+- [x] 단계 9: 카테고리 편집 + 아이템팩 11종 + 백업 v2
 
 ## 컨벤션
 - 커밋 메시지: 한국어, 의미 단위. 배포는 `ship` 스킬 사용.
