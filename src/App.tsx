@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { makeBackup, mergeBackup, parseBackup, saveBackupFile } from './lib/backup'
 import { finish, startBium, toss, undo, type Bium } from './lib/bium'
 import { loadActive, loadHistory, saveActive, saveHistory } from './lib/storage'
 import { Active } from './screens/Active'
@@ -11,6 +12,8 @@ export default function App() {
   const [active, setActive] = useState<Bium | null>(loadActive)
   const [history, setHistory] = useState<Bium[]>(loadHistory)
   const [view, setView] = useState<View>({ kind: 'home' })
+  // 백업 저장·불러오기 결과를 홈에 한 줄로 알려준다
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => saveActive(active), [active])
   useEffect(() => saveHistory(history), [history])
@@ -50,6 +53,22 @@ export default function App() {
       history={history}
       onStart={() => setActive(startBium())}
       onOpen={(id) => setView({ kind: 'result', id })}
+      notice={notice}
+      onExport={async () => {
+        const result = await saveBackupFile(makeBackup(active, history))
+        if (result === 'shared') setNotice('백업 파일을 보냈어요. 잃어버리지 않을 곳에 두세요.')
+        if (result === 'downloaded') setNotice('백업 파일을 저장했어요. 다운로드 폴더에 있어요.')
+      }}
+      onImport={async (file) => {
+        try {
+          const merged = mergeBackup({ active, history }, parseBackup(await file.text()))
+          setActive(merged.active)
+          setHistory(merged.history)
+          setNotice(merged.addedCount > 0 ? `기록 ${merged.addedCount}개를 불러왔어요.` : '이미 다 있는 기록이라 새로 불러온 건 없어요.')
+        } catch (e) {
+          setNotice((e as Error).message)
+        }
+      }}
     />
   )
 }

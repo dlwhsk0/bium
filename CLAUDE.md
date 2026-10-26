@@ -30,6 +30,7 @@
 
 ## 스택
 - React 19 + TypeScript + Vite 8
+- PWA: `vite-plugin-pwa` (홈 화면 설치, 오프라인, autoUpdate). 3D 아이콘까지 precache, Pretendard(jsDelivr)는 런타임 CacheFirst
 - 패키지 매니저: **pnpm**
 
 ## 명령어
@@ -42,11 +43,17 @@
 - `src/lib/bium.ts` — `Bium`/`Toss` 타입, 순수 함수(`startBium`·`toss`·`undo`·`finish`·`summarize`·`periodLabel`)
 - `src/lib/categories.ts` — 분류 4종(라벨·아이콘 slug 목록), `seeded`(결정적 난수), `iconFor`
 - `src/lib/date.ts` — 날짜 키·일수(시작일 포함)·표기
+- `src/lib/backup.ts` — 백업 파일 만들기(`makeBackup`)·검증(`parseBackup`, 깨진 파일은 한국어 문장으로 Error)·합치기(`mergeBackup`, 같은 id는 건너뛰어 여러 번 불러와도 안전)·저장(`saveBackupFile`, 폰은 공유 시트, 그 외 다운로드)
 - `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순). 저장이 막혀도 앱은 동작
 - `src/components/Bin.tsx` — 분류 카드 하나(누르면 넣기). 벽돌 쌓기 배치(`slot`) + 위치·기울기 흔들림은 `seeded(at)`. `animateAfter` 이후에 넣은 것만 떨어지는 애니메이션(처음 열 때 다 떨어지지 않게)
 - `src/screens/` — `Home`(시작 + 지난 비움), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
 - `src/lib/useTwoStep.ts` — 되돌릴 수 없는 버튼(비움 끝·기록 삭제)용 "3초 안에 두 번 눌러 확정" 훅
 - `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
+
+## 데이터 저장 / 백업
+- 서버 없음. 기록은 기기의 localStorage에만 있다. 시작 시 `navigator.storage.persist()`로 영구 저장을 요청(`main.tsx`).
+- 홈 하단 "백업 파일 저장 / 백업 불러오기". 파일 형식 `{ app: 'bium', version: 1, exportedAt, active, history }`. 형식을 바꾸면 version을 올리고 `parseBackup`에서 옛 버전도 받아준다.
+- 불러오기는 **덮어쓰지 않고 합친다**. 진행 중 비움은 지금 진행 중인 게 없을 때만 백업 것을 이어 쓴다.
 
 ## 배포
 - **라이브: https://bium-app.vercel.app** (Vercel, 계정 `dlwhsk0`). `bium.vercel.app`은 남이 쓰고 있어 `bium-app`으로 붙였다.
@@ -66,6 +73,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 4: 모바일 다듬기(manifest·홈화면 메타·터치·안드로이드 진동) + 배포
 - [x] 단계 5: 리디자인 — 분리수거함 컨셉, 3D 아이콘 쌓기, 중앙 정렬, 이름 제거
 - [x] 단계 6: 리디자인 2 — 핀테크 앱 기준 카드 UI, Pretendard, 단일 포인트 색
+- [x] 단계 7: 웹앱(PWA) + 영구 저장 요청 + 백업 파일 저장·불러오기
 
 ## 컨벤션
 - 커밋 메시지: 한국어, 의미 단위. 배포는 `ship` 스킬 사용.
