@@ -48,7 +48,7 @@ export default function App() {
   return (
     <Home
       history={history}
-      onStart={(name) => setActive(startBium(name))}
+      onStart={() => setActive(startBium())}
       onOpen={(id) => setView({ kind: 'result', id })}
     />
   )

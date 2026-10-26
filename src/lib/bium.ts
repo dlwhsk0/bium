@@ -1,5 +1,5 @@
 import { emptyCounts, type CategoryKey } from './categories'
-import { dayKey, daysInclusive, formatKoreanMD, formatMD } from './date'
+import { dayKey, daysInclusive, formatMD } from './date'
 
 /** 버리기 1회. 날짜별 집계·되돌리기 모두 이 목록에서 계산한다. */
 export interface Toss {
@@ -10,7 +10,6 @@ export interface Toss {
 /** 며칠에 걸치는 비움 한 번 */
 export interface Bium {
   id: string
-  name: string
   startedAt: number
   endedAt?: number
   tosses: Toss[]
@@ -27,10 +26,8 @@ export interface BiumStats {
 // crypto.randomUUID는 보안 컨텍스트(https)에서만 있어서 폰으로 LAN 접속하는 개발 환경에선 못 쓴다
 const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 
-export const defaultName = (t: number) => `${formatKoreanMD(t)} 비움`
-
-export function startBium(name: string, now = Date.now()): Bium {
-  return { id: newId(), name: name.trim() || defaultName(now), startedAt: now, tosses: [] }
+export function startBium(now = Date.now()): Bium {
+  return { id: newId(), startedAt: now, tosses: [] }
 }
 
 export function toss(b: Bium, category: CategoryKey, now = Date.now()): Bium {

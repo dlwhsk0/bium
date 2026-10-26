@@ -1,17 +1,21 @@
+/*
+ * 컨셉: 아파트 분리수거장. 시멘트 바닥 위에 원색 수거함 4개.
+ * 색은 수거함에만 쓰고 나머지는 바닥·잉크 두 톤으로 조용하게.
+ */
 :root {
-  --bg: #f6f3ee;
-  --surface: #ffffff;
-  --text: #2b2823;
-  --muted: #8a8378;
-  --border: #e6e0d6;
-  --accent: #3f7d5c;
-  --accent-text: #ffffff;
-  --danger: #c4553d;
-  --shadow: 0 2px 10px rgba(60, 50, 30, 0.08);
+  --floor: #e3e8ea;
+  --floor-line: #cfd6d9;
+  --ink: #17212b;
+  --ink-soft: #5d6b75;
+  --sticker: #ffffff;
+  --danger: #d23c2f;
 
-  font-family: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  color: var(--text);
-  background: var(--bg);
+  --display: 'Black Han Sans', 'Gothic A1', sans-serif;
+  --body: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+
+  font-family: var(--body);
+  color: var(--ink);
+  background: var(--floor);
   color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -19,16 +23,31 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1b1a18;
-    --surface: #262421;
-    --text: #efebe4;
-    --muted: #a39b8f;
-    --border: #3a3732;
-    --accent: #6fb38c;
-    --accent-text: #10241a;
-    --danger: #e07a62;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    /* 밤의 수거장: 가로등 아래 어두운 바닥 */
+    --floor: #11171c;
+    --floor-line: #232c33;
+    --ink: #e7edf0;
+    --ink-soft: #8b99a3;
+    --danger: #ff6b5c;
   }
+}
+
+/* 수거함 색 — 의류함 코발트, 소품 앰버, 화장품 핑크, 쓰레기 초록 */
+.bin-clothes {
+  --bin: #2f5fdc;
+  --bin-deep: #1d3f9e;
+}
+.bin-goods {
+  --bin: #f2a516;
+  --bin-deep: #b97606;
+}
+.bin-cosmetics {
+  --bin: #e8508c;
+  --bin-deep: #a92e60;
+}
+.bin-trash {
+  --bin: #2e9a62;
+  --bin-deep: #1d6b42;
 }
 
 * {
@@ -37,20 +56,17 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--floor);
   overscroll-behavior: none; /* 당겨서 새로고침·출렁임 방지 */
 }
 
-button,
-input {
+button {
   font: inherit;
   color: inherit;
-}
-
-button {
   cursor: pointer;
   border: none;
   background: none;
+  padding: 0;
   touch-action: manipulation; /* 연타 시 더블탭 줌 방지 */
   user-select: none;
   -webkit-user-select: none;
@@ -58,8 +74,13 @@ button {
 }
 
 button:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: default;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
 }
 
 h1,
@@ -68,35 +89,215 @@ p {
   margin: 0;
 }
 
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .screen {
   max-width: 480px;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+  padding: max(24px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: stretch;
+  gap: 24px;
+  text-align: center;
 }
 
 .primary {
   width: 100%;
-  padding: 16px;
+  padding: 18px;
   border-radius: 14px;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-size: 1.1rem;
+  background: var(--ink);
+  color: var(--floor);
+  font-family: var(--display);
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+}
+
+.primary:active {
+  transform: translateY(1px);
+}
+
+.ghost {
+  padding: 12px 8px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
-.title {
-  font-size: 1.3rem;
-  font-weight: 700;
+.ghost.danger {
+  color: var(--danger);
 }
 
 .period {
-  margin-top: 2px;
-  color: var(--muted);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* ── 개수 ── */
+.tally-total {
+  margin-top: 4px;
+  font-family: var(--display);
+  font-size: 5.5rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tally-unit {
+  font-weight: 700;
+}
+
+/* ── 수거함 ── */
+.yard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 14px;
+}
+
+.bin {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 190px;
+}
+
+button.bin:active .bin-front,
+button.bin:active .bin-back {
+  transform: scaleY(0.96);
+}
+
+.bin-back,
+.bin-front {
+  position: absolute;
+  transform-origin: 50% 100%;
+  transition: transform 0.08s;
+}
+
+/* 안쪽 뒷벽: 앞판보다 높고 어둡다 */
+.bin-back {
+  left: 7%;
+  right: 7%;
+  bottom: 0;
+  height: 118px;
+  border-radius: 10px 10px 0 0;
+  background: var(--bin-deep);
+}
+
+.pile {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 0;
+  bottom: 32px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.item {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: translateX(-50%) rotate(var(--r, 0deg));
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+}
+
+.item.falling {
+  animation: fall 0.6s cubic-bezier(0.45, 0, 0.8, 0.5) both;
+}
+
+/* 위에서 떨어져 제자리에 톡 안착 */
+@keyframes fall {
+  0% {
+    transform: translate(-50%, -260px) rotate(calc(var(--r, 0deg) - 160deg));
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  78% {
+    transform: translate(-50%, 0) rotate(var(--r, 0deg));
+    animation-timing-function: ease-out;
+  }
+  90% {
+    transform: translate(-50%, -7px) rotate(var(--r, 0deg));
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translate(-50%, 0) rotate(var(--r, 0deg));
+  }
+}
+
+/* 더미가 꽉 찼을 때: 떨어져서 더미 속으로 사라진다 */
+.item.vanishing {
+  animation: vanish 0.6s ease-in both;
+}
+
+@keyframes vanish {
+  0% {
+    transform: translate(-50%, -200px) rotate(-120deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 6px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* 앞판: 낮아서 쌓인 게 보인다. 흰 라벨 스티커가 붙어 있다. */
+.bin-front {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px 6px 14px 14px;
+  background: var(--bin);
+  box-shadow:
+    inset 0 5px 0 rgba(255, 255, 255, 0.22),
+    0 6px 0 var(--bin-deep);
+}
+
+.sticker {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 12px 4px;
+  border-radius: 6px;
+  background: var(--sticker);
+  color: #17212b;
+}
+
+.sticker-label {
+  font-weight: 800;
   font-size: 0.9rem;
+}
+
+.sticker-count {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.controls {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
 }
 
 /* ── 홈 ── */
@@ -104,293 +305,116 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 48px 0 16px;
-}
-
-.hero-icon {
-  font-size: 4.5rem;
+  gap: 10px;
+  padding-top: 40px;
 }
 
 .brand {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+  font-family: var(--display);
+  font-size: 4.5rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.06em;
 }
 
 .tagline {
-  color: var(--muted);
+  color: var(--ink-soft);
+  font-weight: 700;
+  line-height: 1.5;
 }
 
-.start {
+.mini-yard {
   display: flex;
-  flex-direction: column;
   gap: 10px;
+  margin-top: 28px;
 }
 
-.name-input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface);
-  font-size: 1rem; /* 16px 미만이면 iOS가 포커스 시 확대 */
+.mini-bin {
+  position: relative;
+  width: 68px;
+  height: 78px;
+}
+
+.mini-bin img {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 44px;
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+.mini-bin:nth-child(even) img {
+  transform: translateX(-50%) rotate(10deg);
+}
+
+.mini-front {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px 4px 10px 10px;
+  background: var(--bin);
+  box-shadow: 0 4px 0 var(--bin-deep);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.home .primary {
+  margin-top: 12px;
 }
 
 .history h2 {
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-  color: var(--muted);
-  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .history ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border-top: 1px solid var(--floor-line);
 }
 
 .history-item {
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  text-align: left;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--floor-line);
 }
 
-.history-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.history-text strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.history-text small {
-  color: var(--muted);
+.history-period {
+  font-weight: 700;
 }
 
 .history-total {
-  flex-shrink: 0;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-/* ── 비우는 중 ── */
-.bar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.bar .title {
-  overflow-wrap: anywhere;
-}
-
-.undo {
-  flex-shrink: 0;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-size: 0.85rem;
-}
-
-.bin {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 200px;
-}
-
-.drop-zone {
-  position: relative;
-  flex: 1;
-  width: 100%;
-}
-
-.drop {
-  position: absolute;
-  left: 50%;
-  font-size: 2.6rem;
-  line-height: 1;
-  pointer-events: none;
-  animation: drop 0.75s cubic-bezier(0.5, 0, 0.9, 0.6) forwards;
-}
-
-/* drop-zone 맨 위에서 출발해 쓰레기통 입구(zone 아래 끝) 안으로 쏙 들어간다 */
-@keyframes drop {
-  from {
-    top: 0;
-    transform: translateX(calc(-50% + var(--x))) rotate(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  85% {
-    transform: translateX(-50%) rotate(var(--spin)) scale(1);
-    opacity: 1;
-  }
-  to {
-    top: calc(100% + 1.5rem);
-    transform: translateX(-50%) rotate(var(--spin)) scale(0.5);
-    opacity: 0;
-  }
-}
-
-.bin-icon {
-  position: relative;
-  z-index: 1; /* 떨어진 이모지가 통 뒤로 들어가 보이게 */
-  font-size: 7rem;
-  line-height: 1;
-}
-
-.bin-icon.wobble {
-  animation: wobble 0.35s ease-out;
-  transform-origin: 50% 100%;
-}
-
-@keyframes wobble {
-  30% {
-    transform: rotate(-6deg) scaleY(0.94);
-  }
-  60% {
-    transform: rotate(4deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .drop {
-    animation-duration: 0.2s;
-  }
-
-  .bin-icon.wobble {
-    animation: none;
-  }
-}
-
-.bin-total {
-  font-size: 2.4rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.cats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.cat {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-  padding: 18px 14px;
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  text-align: left;
-  transition: transform 0.08s;
-}
-
-.cat:active {
-  transform: scale(0.96);
-}
-
-.cat-icon {
-  font-size: 1.8rem;
-}
-
-.cat-label {
-  font-weight: 600;
-}
-
-.cat-count {
-  font-weight: 700;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.finish {
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.finish.confirming {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-/* ── 통계 ── */
-.result {
-  text-align: center;
-}
-
-.eyebrow {
-  margin-top: 32px;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.total {
-  padding: 8px 0;
+  font-family: var(--display);
   font-size: 1.1rem;
 }
 
-.total-num {
-  margin-right: 4px;
-  font-size: 3.5rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.breakdown {
-  list-style: none;
-  margin: 0;
-  padding: 4px 16px;
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.breakdown li {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-}
-
-.breakdown li + li {
-  border-top: 1px solid var(--border);
-}
-
+/* ── 통계 ── */
 .best {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  flex-direction: column;
+  gap: 4px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.best strong {
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 400;
 }
 
 .result-actions {
@@ -400,12 +424,9 @@ p {
   gap: 4px;
 }
 
-.text-button {
-  padding: 12px;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.text-button.confirming {
-  color: var(--danger);
+@media (prefers-reduced-motion: reduce) {
+  .item.falling,
+  .item.vanishing {
+    animation-duration: 0.01s;
+  }
 }

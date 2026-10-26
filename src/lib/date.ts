@@ -22,12 +22,6 @@ export function formatMD(t: number): string {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-/** `10월 26일` */
-export function formatKoreanMD(t: number): string {
-  const d = new Date(t)
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`
-}
-
 /** `2026-10-27` → `10/27` */
 export function formatDayKey(key: string): string {
   const [, m, d] = key.split('-')
