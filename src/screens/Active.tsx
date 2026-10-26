@@ -32,6 +32,9 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
           {bium.tosses.length}
           <span className="unit">개</span>
         </p>
+        <button className="chip" onClick={onEditCategories}>
+          카테고리 편집
+        </button>
       </header>
 
       <section className="bins">
@@ -47,14 +50,9 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
       </section>
 
       <footer className="actions">
-        <div className="text-buttons">
-          <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
-            방금 넣은 것 되돌리기
-          </button>
-          <button className="text-button" onClick={onEditCategories}>
-            카테고리 편집
-          </button>
-        </div>
+        <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
+          방금 넣은 것 되돌리기
+        </button>
         <button
           className={finishButton.confirming ? 'cta confirming' : 'cta'}
           onClick={finishButton.press}
