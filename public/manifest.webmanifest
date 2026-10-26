@@ -1,0 +1,13 @@
+{
+  "name": "비움",
+  "short_name": "비움",
+  "description": "방 청소하며 버리는 물건을 쓰레기통에 던지듯 기록해요",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f3ee",
+  "theme_color": "#f6f3ee",
+  "lang": "ko",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -38,6 +38,7 @@
 body {
   margin: 0;
   background: var(--bg);
+  overscroll-behavior: none; /* 당겨서 새로고침·출렁임 방지 */
 }
 
 button,
@@ -51,6 +52,9 @@ button {
   border: none;
   background: none;
   touch-action: manipulation; /* 연타 시 더블탭 줌 방지 */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 button:disabled {

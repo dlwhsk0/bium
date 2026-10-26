@@ -34,6 +34,7 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
 
   function handleToss(category: CategoryKey) {
     onToss(category)
+    navigator.vibrate?.(12) // 안드로이드만. iOS 사파리는 미지원이라 무시된다
     const drop = { id: nextDropId.current++, emoji: randomEmoji(category), x: rand(-50, 50), spin: rand(-270, 270) }
     setDrops((d) => [...d, drop])
   }
