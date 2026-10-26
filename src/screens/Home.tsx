@@ -1,41 +1,29 @@
-import { useState } from 'react'
-import { defaultName, periodLabel, summarize, type Bium } from '../lib/bium'
+import { periodLabel, type Bium } from '../lib/bium'
+import { CATEGORIES } from '../lib/categories'
 
 interface Props {
   history: Bium[]
-  onStart: (name: string) => void
+  onStart: () => void
   onOpen: (id: string) => void
 }
 
 export function Home({ history, onStart, onOpen }: Props) {
-  const [name, setName] = useState('')
-  const [placeholder] = useState(() => defaultName(Date.now()))
-
   return (
     <main className="screen home">
       <div className="hero">
-        <span className="hero-icon" aria-hidden>🗑️</span>
         <h1 className="brand">비움</h1>
-        <p className="tagline">버릴 때마다 톡, 쓰레기통에 던져요</p>
+        <p className="tagline">버릴 물건을 하나씩<br />분리수거함에 넣어요</p>
+        <div className="mini-yard" aria-hidden>
+          {CATEGORIES.map((c) => (
+            <span key={c.key} className={`mini-bin bin-${c.key}`}>
+              <img src={`/icons/${c.icons[0]}.png`} alt="" draggable={false} />
+              <span className="mini-front">{c.label}</span>
+            </span>
+          ))}
+        </div>
       </div>
 
-      <form
-        className="start"
-        onSubmit={(e) => {
-          e.preventDefault()
-          onStart(name)
-        }}
-      >
-        <input
-          className="name-input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={placeholder}
-          maxLength={30}
-          aria-label="비움 이름"
-        />
-        <button className="primary" type="submit">비움 시작</button>
-      </form>
+      <button className="primary" onClick={onStart}>비움 시작</button>
 
       {history.length > 0 && (
         <section className="history">
@@ -44,11 +32,8 @@ export function Home({ history, onStart, onOpen }: Props) {
             {history.map((b) => (
               <li key={b.id}>
                 <button className="history-item" onClick={() => onOpen(b.id)}>
-                  <span className="history-text">
-                    <strong>{b.name}</strong>
-                    <small>{periodLabel(b)}</small>
-                  </span>
-                  <span className="history-total">{summarize(b).total}개</span>
+                  <span className="history-period">{periodLabel(b)}</span>
+                  <span className="history-total">{b.tosses.length}개</span>
                 </button>
               </li>
             ))}
