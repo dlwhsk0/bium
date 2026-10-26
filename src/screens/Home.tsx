@@ -8,9 +8,10 @@ interface Props {
   notice: string | null
   onExport: () => void
   onImport: (file: File) => void
+  onIntro: () => void
 }
 
-export function Home({ history, onStart, onOpen, notice, onExport, onImport }: Props) {
+export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
 
   return (
@@ -53,6 +54,9 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport }: P
           </button>
           <button className="text-button" onClick={() => fileInput.current?.click()}>
             백업 불러오기
+          </button>
+          <button className="text-button" onClick={onIntro}>
+            앱 소개
           </button>
           <input
             ref={fileInput}
