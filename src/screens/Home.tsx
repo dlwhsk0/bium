@@ -1,5 +1,4 @@
 import { periodLabel, type Bium } from '../lib/bium'
-import { CATEGORIES } from '../lib/categories'
 
 interface Props {
   history: Bium[]
@@ -10,36 +9,35 @@ interface Props {
 export function Home({ history, onStart, onOpen }: Props) {
   return (
     <main className="screen home">
-      <div className="hero">
-        <h1 className="brand">비움</h1>
-        <p className="tagline">버릴 물건을 하나씩<br />분리수거함에 넣어요</p>
-        <div className="mini-yard" aria-hidden>
-          {CATEGORIES.map((c) => (
-            <span key={c.key} className={`mini-bin bin-${c.key}`}>
-              <img src={`/icons/${c.icons[0]}.png`} alt="" draggable={false} />
-              <span className="mini-front">{c.label}</span>
-            </span>
-          ))}
-        </div>
+      <div className="intro">
+        <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
+        <h1 className="title">비움</h1>
+        <p className="body">
+          버릴 물건을 하나씩 넣으면
+          <br />
+          며칠이 걸려도 대신 세어둘게요
+        </p>
       </div>
-
-      <button className="primary" onClick={onStart}>비움 시작</button>
 
       {history.length > 0 && (
         <section className="history">
-          <h2>지난 비움</h2>
-          <ul>
+          <h2 className="caption">지난 비움</h2>
+          <ul className="card list">
             {history.map((b) => (
               <li key={b.id}>
-                <button className="history-item" onClick={() => onOpen(b.id)}>
-                  <span className="history-period">{periodLabel(b)}</span>
-                  <span className="history-total">{b.tosses.length}개</span>
+                <button className="list-row" onClick={() => onOpen(b.id)}>
+                  <span className="list-title">{b.tosses.length}개 비움</span>
+                  <span className="list-sub">{periodLabel(b)}</span>
                 </button>
               </li>
             ))}
           </ul>
         </section>
       )}
+
+      <footer className="actions">
+        <button className="cta" onClick={onStart}>비움 시작하기</button>
+      </footer>
     </main>
   )
 }

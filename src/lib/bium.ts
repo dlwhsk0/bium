@@ -1,5 +1,5 @@
 import { emptyCounts, type CategoryKey } from './categories'
-import { dayKey, daysInclusive, formatMD } from './date'
+import { dayKey, daysInclusive, formatKoreanMD } from './date'
 
 /** 버리기 1회. 날짜별 집계·되돌리기 모두 이 목록에서 계산한다. */
 export interface Toss {
@@ -64,10 +64,9 @@ export function summarize(b: Bium, now = Date.now()): BiumStats {
   }
 }
 
-/** 진행 중: `10/26 시작 · 4일째` / 끝남: `10/26 ~ 10/29 (4일)` */
+/** 진행 중: `4일째 비우는 중` / 끝남: `10월 23일부터 10월 26일까지` (하루면 `10월 26일`) */
 export function periodLabel(b: Bium, now = Date.now()): string {
-  const days = daysInclusive(b.startedAt, b.endedAt ?? now)
-  if (b.endedAt === undefined) return `${formatMD(b.startedAt)} 시작 · ${days}일째`
-  if (days === 1) return `${formatMD(b.startedAt)} (1일)`
-  return `${formatMD(b.startedAt)} ~ ${formatMD(b.endedAt)} (${days}일)`
+  if (b.endedAt === undefined) return `${daysInclusive(b.startedAt, now)}일째 비우는 중`
+  if (daysInclusive(b.startedAt, b.endedAt) === 1) return formatKoreanMD(b.startedAt)
+  return `${formatKoreanMD(b.startedAt)}부터 ${formatKoreanMD(b.endedAt)}까지`
 }

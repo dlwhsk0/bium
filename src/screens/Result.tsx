@@ -2,7 +2,6 @@ import { periodLabel, summarize, type Bium } from '../lib/bium'
 import { CATEGORIES } from '../lib/categories'
 import { formatDayKey } from '../lib/date'
 import { useTwoStep } from '../lib/useTwoStep'
-import { Bin } from '../components/Bin'
 
 interface Props {
   bium: Bium
@@ -16,31 +15,43 @@ export function Result({ bium, onClose, onDelete }: Props) {
 
   return (
     <main className="screen result">
-      <header className="tally">
-        <p className="period">{periodLabel(bium)}</p>
-        <p className="tally-total">{s.total}</p>
-        <p className="tally-unit">개 비웠어요</p>
+      <header className="summary">
+        <img className="intro-icon" src="/icons/party.png" alt="" draggable={false} />
+        <p className="caption">{periodLabel(bium)}</p>
+        <p className="big-number">
+          {s.total}
+          <span className="unit">개 비웠어요</span>
+        </p>
+        <p className="body">{s.days}일 동안 방에서 내보냈어요</p>
       </header>
 
-      <section className="yard">
+      <section className="card tiles">
         {CATEGORIES.map((c) => (
-          <Bin key={c.key} category={c.key} tosses={bium.tosses.filter((t) => t.category === c.key)} />
+          <div key={c.key} className="tile">
+            <img src={`/icons/${c.icons[0]}.png`} alt="" draggable={false} />
+            <span className="tile-label">{c.label}</span>
+            <span className="tile-count">{s.byCategory[c.key]}개</span>
+          </div>
         ))}
       </section>
 
       {s.bestDay && (
-        <p className="best">
-          가장 많이 치운 날
-          <strong>{formatDayKey(s.bestDay.day)} · {s.bestDay.count}개</strong>
-        </p>
+        <section className="card best">
+          <span className="caption">가장 많이 치운 날</span>
+          <span className="best-day">{formatDayKey(s.bestDay.day)}</span>
+          <span className="body">이날 {s.bestDay.count}개를 비웠어요</span>
+        </section>
       )}
 
-      <div className="result-actions">
-        <button className="primary" onClick={onClose}>처음으로</button>
-        <button className={deleteButton.confirming ? 'ghost danger' : 'ghost'} onClick={deleteButton.press}>
+      <footer className="actions">
+        <button
+          className={deleteButton.confirming ? 'text-button danger' : 'text-button'}
+          onClick={deleteButton.press}
+        >
           {deleteButton.confirming ? '한 번 더 누르면 기록이 지워져요' : '이 기록 지우기'}
         </button>
-      </div>
+        <button className="cta" onClick={onClose}>처음으로</button>
+      </footer>
     </main>
   )
 }

@@ -24,13 +24,15 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
 
   return (
     <main className="screen active">
-      <header className="tally">
-        <p className="period">{periodLabel(bium)}</p>
-        <p className="tally-total" aria-live="polite">{bium.tosses.length}</p>
-        <p className="tally-unit">개 비웠어요</p>
+      <header className="summary">
+        <p className="caption">{periodLabel(bium)}</p>
+        <p className="big-number" aria-live="polite">
+          {bium.tosses.length}
+          <span className="unit">개</span>
+        </p>
       </header>
 
-      <section className="yard">
+      <section className="bins">
         {CATEGORIES.map((c) => (
           <Bin
             key={c.key}
@@ -42,11 +44,14 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
         ))}
       </section>
 
-      <footer className="controls">
-        <button className="ghost" onClick={onUndo} disabled={bium.tosses.length === 0}>
-          되돌리기
+      <footer className="actions">
+        <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
+          방금 넣은 것 되돌리기
         </button>
-        <button className={finishButton.confirming ? 'ghost danger' : 'ghost'} onClick={finishButton.press}>
+        <button
+          className={finishButton.confirming ? 'cta confirming' : 'cta'}
+          onClick={finishButton.press}
+        >
           {finishButton.confirming ? '한 번 더 누르면 끝나요' : '비움 끝내기'}
         </button>
       </footer>
