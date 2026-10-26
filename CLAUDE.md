@@ -39,6 +39,11 @@
 - `src/lib/useTwoStep.ts` — 되돌릴 수 없는 버튼(비움 끝·기록 삭제)용 "3초 안에 두 번 눌러 확정" 훅
 - `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
 
+## 배포
+- **라이브: https://bium-app.vercel.app** (Vercel, 계정 `dlwhsk0`). `bium.vercel.app`은 남이 쓰고 있어 `bium-app`으로 붙였다.
+- GitHub 레포가 Vercel 프로젝트 `bium`에 연결돼 있어 **`main`에 push하면 자동 배포**. 수동 배포는 `pnpm dlx vercel deploy --prod`.
+- 해시 배포 URL(`bium-xxxx-…vercel.app`)은 Vercel 로그인 보호가 걸려 있다. 공유는 위 라이브 주소로.
+
 ## ⚠️ pnpm 네이티브 바이너리
 pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 건너뛰는 버그가 있어
 `@rolldown/binding-{darwin-arm64,linux-x64-gnu}`, `@oxlint/binding-{darwin-arm64,linux-x64-gnu}`를
@@ -49,7 +54,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 1: 화면 골격 (시작 → 비우는 중 → 통계) + 분류별 카운트 + localStorage 저장(며칠 이어가기)
 - [x] 단계 2: 분류별 이모지 세트 + 랜덤 선택 + 쓰레기통 낙하 애니메이션
 - [x] 단계 3: 통계 화면 + 지난 비움 기록 목록(열어보기·두 번 눌러 삭제)
-- [ ] 단계 4: 모바일 다듬기 + 배포
+- [x] 단계 4: 모바일 다듬기(manifest·홈화면 메타·터치·안드로이드 진동) + 배포
 
 ## 컨벤션
 - 커밋 메시지: 한국어, 의미 단위. 배포는 `ship` 스킬 사용.
