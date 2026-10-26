@@ -10,7 +10,7 @@
 3. **비움 끝** 버튼 → 세션 종료 + **통계** 표시
    - 분류별 개수, 총합, 기간(시작일 ~ 종료일 · N일)
    - **가장 많이 치운 날** (날짜 + 그날 개수)
-- 버릴 때마다 날짜별로 집계한다(가장 많이 치운 날 계산용). 데이터 모델은 날짜(`YYYY-MM-DD`) → 분류별 개수.
+- 버릴 때마다 `{ category, at }` 한 건을 `tosses`에 쌓는다. 분류별·날짜별 개수, 가장 많이 치운 날은 모두 여기서 계산(`summarize`). 날짜는 로컬 기준 `YYYY-MM-DD`.
 - 실수로 누른 걸 위해 **방금 버린 것 되돌리기**(직전 1개 취소)를 둔다.
 - **비움 이름:** 비움 시작 시 입력한다(예: "10월 방 정리"). 비워두면 기본값 `M월 D일 비움`(시작일). 진행 중·기록 목록·통계 상단에 이름 + 기간을 함께 표시.
 - **기간 표시:** 진행 중엔 `10/26 시작 · 4일째`, 끝나면 `10/26 ~ 10/29 (4일)`.
@@ -30,6 +30,14 @@
 - 린트: `pnpm lint`
 - 미리보기: `pnpm preview`
 
+## 구조
+- `src/lib/bium.ts` — `Bium`/`Toss` 타입, 순수 함수(`startBium`·`toss`·`undo`·`finish`·`summarize`·`periodLabel`)
+- `src/lib/categories.ts` — 분류 4종(라벨·대표 아이콘·랜덤용 이모지 목록)
+- `src/lib/date.ts` — 날짜 키·일수(시작일 포함)·표기
+- `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순). 저장이 막혀도 앱은 동작
+- `src/screens/` — `Home`(이름 입력 + 시작 + 지난 비움), `Active`(분류 버튼·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(통계)
+- `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
+
 ## ⚠️ pnpm 네이티브 바이너리
 pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 건너뛰는 버그가 있어
 `@rolldown/binding-{darwin-arm64,linux-x64-gnu}`, `@oxlint/binding-{darwin-arm64,linux-x64-gnu}`를
@@ -37,7 +45,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 
 ## 빌드 단계 (체크리스트)
 - [x] 단계 0: 스캐폴딩 + CLAUDE.md
-- [ ] 단계 1: 화면 골격 (시작 → 비우는 중 → 통계) + 분류별 카운트 + localStorage 저장(며칠 이어가기)
+- [x] 단계 1: 화면 골격 (시작 → 비우는 중 → 통계) + 분류별 카운트 + localStorage 저장(며칠 이어가기)
 - [ ] 단계 2: 분류별 이모지 세트 + 랜덤 선택 + 쓰레기통 낙하 애니메이션
 - [ ] 단계 3: 통계 화면 + 지난 비움 기록 목록
 - [ ] 단계 4: 모바일 다듬기 + 배포
