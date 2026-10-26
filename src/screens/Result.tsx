@@ -1,14 +1,17 @@
 import { periodLabel, summarize, type Bium } from '../lib/bium'
 import { CATEGORIES } from '../lib/categories'
 import { formatDayKey } from '../lib/date'
+import { useTwoStep } from '../lib/useTwoStep'
 
 interface Props {
   bium: Bium
   onClose: () => void
+  onDelete: () => void
 }
 
-export function Result({ bium, onClose }: Props) {
+export function Result({ bium, onClose, onDelete }: Props) {
   const s = summarize(bium)
+  const deleteButton = useTwoStep(onDelete)
 
   return (
     <main className="screen result">
@@ -36,7 +39,15 @@ export function Result({ bium, onClose }: Props) {
         </div>
       )}
 
-      <button className="primary" onClick={onClose}>처음으로</button>
+      <div className="result-actions">
+        <button className="primary" onClick={onClose}>처음으로</button>
+        <button
+          className={deleteButton.confirming ? 'text-button confirming' : 'text-button'}
+          onClick={deleteButton.press}
+        >
+          {deleteButton.confirming ? '한 번 더 누르면 기록이 지워져요' : '이 기록 지우기'}
+        </button>
+      </div>
     </main>
   )
 }

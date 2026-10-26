@@ -389,6 +389,19 @@ p {
   box-shadow: var(--shadow);
 }
 
-.result .primary {
+.result-actions {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.text-button {
+  padding: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.text-button.confirming {
+  color: var(--danger);
 }
