@@ -46,7 +46,9 @@
 - `src/lib/backup.ts` — 백업 파일 만들기(`makeBackup`)·검증(`parseBackup`, 깨진 파일은 한국어 문장으로 Error)·합치기(`mergeBackup`, 같은 id는 건너뛰어 여러 번 불러와도 안전)·저장(`saveBackupFile`, 폰은 공유 시트, 그 외 다운로드)
 - `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순). 저장이 막혀도 앱은 동작
 - `src/components/Bin.tsx` — 분류 카드 하나(누르면 넣기). 벽돌 쌓기 배치(`slot`) + 위치·기울기 흔들림은 `seeded(at)`. `animateAfter` 이후에 넣은 것만 떨어지는 애니메이션(처음 열 때 다 떨어지지 않게)
-- `src/screens/` — `Home`(시작 + 지난 비움), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
+- `src/screens/Onboarding.tsx` — 처음 열면 나오는 소개 5장(공감, 휴지 하나부터, 하나씩 금방, 직접 눌러보기, 응원). 좌우로 밀어 넘김. 마지막 버튼은 바로 비움 시작. 기록이 이미 있으면 안 나오고(`bium:onboarded`), 홈의 "앱 소개"로 다시 볼 수 있다
+- `src/lib/pile.ts` — 더미 벽돌 쌓기 배치(`slot`, `ROW_H`). `Bin`과 소개 화면이 같이 쓴다
+- `src/screens/` — `Home`(시작 + 지난 비움 + 백업·앱 소개), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
 - `src/lib/useTwoStep.ts` — 되돌릴 수 없는 버튼(비움 끝·기록 삭제)용 "3초 안에 두 번 눌러 확정" 훅
 - `src/App.tsx` — 진행 중 비움이 있으면 항상 `Active`, 없으면 홈/통계
 
@@ -74,6 +76,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 5: 리디자인 — 분리수거함 컨셉, 3D 아이콘 쌓기, 중앙 정렬, 이름 제거
 - [x] 단계 6: 리디자인 2 — 핀테크 앱 기준 카드 UI, Pretendard, 단일 포인트 색
 - [x] 단계 7: 웹앱(PWA) + 영구 저장 요청 + 백업 파일 저장·불러오기
+- [x] 단계 8: 처음 소개(온보딩) 5장 — 바쁜 학생·직장인, 휴지 하나부터, 하나씩 금방, 재미, 응원
 
 ## 컨벤션
 - 커밋 메시지: 한국어, 의미 단위. 배포는 `ship` 스킬 사용.

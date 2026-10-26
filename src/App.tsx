@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { makeBackup, mergeBackup, parseBackup, saveBackupFile } from './lib/backup'
 import { finish, startBium, toss, undo, type Bium } from './lib/bium'
-import { loadActive, loadHistory, saveActive, saveHistory } from './lib/storage'
+import { loadActive, loadHistory, loadOnboarded, saveActive, saveHistory, saveOnboarded } from './lib/storage'
 import { Active } from './screens/Active'
 import { Home } from './screens/Home'
+import { Onboarding } from './screens/Onboarding'
 import { Result } from './screens/Result'
 
 type View = { kind: 'home' } | { kind: 'result'; id: string }
@@ -12,11 +13,28 @@ export default function App() {
   const [active, setActive] = useState<Bium | null>(loadActive)
   const [history, setHistory] = useState<Bium[]>(loadHistory)
   const [view, setView] = useState<View>({ kind: 'home' })
+  // 처음 연 사람에게만 소개를 보여준다. 이미 기록이 있으면 본 것으로 친다.
+  const [onboarded, setOnboarded] = useState(() => loadOnboarded() || active !== null || history.length > 0)
   // 백업 저장·불러오기 결과를 홈에 한 줄로 알려준다
   const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => saveActive(active), [active])
   useEffect(() => saveHistory(history), [history])
+  useEffect(() => {
+    if (onboarded) saveOnboarded()
+  }, [onboarded])
+
+  if (!onboarded) {
+    return (
+      <Onboarding
+        onSkip={() => setOnboarded(true)}
+        onStart={() => {
+          setOnboarded(true)
+          setActive(startBium())
+        }}
+      />
+    )
+  }
 
   if (active) {
     return (
@@ -54,6 +72,7 @@ export default function App() {
       onStart={() => setActive(startBium())}
       onOpen={(id) => setView({ kind: 'result', id })}
       notice={notice}
+      onIntro={() => setOnboarded(false)}
       onExport={async () => {
         const result = await saveBackupFile(makeBackup(active, history))
         if (result === 'shared') setNotice('백업 파일을 보냈어요. 잃어버리지 않을 곳에 두세요.')
