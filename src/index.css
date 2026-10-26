@@ -214,9 +214,71 @@ p {
   min-height: 200px;
 }
 
+.drop-zone {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+.drop {
+  position: absolute;
+  left: 50%;
+  font-size: 2.6rem;
+  line-height: 1;
+  pointer-events: none;
+  animation: drop 0.75s cubic-bezier(0.5, 0, 0.9, 0.6) forwards;
+}
+
+/* drop-zone 맨 위에서 출발해 쓰레기통 입구(zone 아래 끝) 안으로 쏙 들어간다 */
+@keyframes drop {
+  from {
+    top: 0;
+    transform: translateX(calc(-50% + var(--x))) rotate(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    transform: translateX(-50%) rotate(var(--spin)) scale(1);
+    opacity: 1;
+  }
+  to {
+    top: calc(100% + 1.5rem);
+    transform: translateX(-50%) rotate(var(--spin)) scale(0.5);
+    opacity: 0;
+  }
+}
+
 .bin-icon {
+  position: relative;
+  z-index: 1; /* 떨어진 이모지가 통 뒤로 들어가 보이게 */
   font-size: 7rem;
   line-height: 1;
+}
+
+.bin-icon.wobble {
+  animation: wobble 0.35s ease-out;
+  transform-origin: 50% 100%;
+}
+
+@keyframes wobble {
+  30% {
+    transform: rotate(-6deg) scaleY(0.94);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop {
+    animation-duration: 0.2s;
+  }
+
+  .bin-icon.wobble {
+    animation: none;
+  }
 }
 
 .bin-total {

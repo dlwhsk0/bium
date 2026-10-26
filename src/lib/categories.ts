@@ -7,6 +7,11 @@ export const CATEGORIES = [
 
 export type CategoryKey = (typeof CATEGORIES)[number]['key']
 
+export function randomEmoji(key: CategoryKey): string {
+  const { emojis } = CATEGORIES.find((c) => c.key === key)!
+  return emojis[Math.floor(Math.random() * emojis.length)]
+}
+
 export function emptyCounts(): Record<CategoryKey, number> {
   return { clothes: 0, goods: 0, cosmetics: 0, trash: 0 }
 }

@@ -1,6 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { periodLabel, summarize, type Bium } from '../lib/bium'
-import { CATEGORIES, type CategoryKey } from '../lib/categories'
+import { CATEGORIES, randomEmoji, type CategoryKey } from '../lib/categories'
+
+/** 화면에서 떨어지는 중인 이모지 하나. 쓰레기통에 닿으면 사라진다. */
+interface Drop {
+  id: number
+  emoji: string
+  /** 가로 시작 위치 흔들림(px) */
+  x: number
+  /** 떨어지면서 도는 각도(deg) */
+  spin: number
+}
+
+const rand = (min: number, max: number) => min + Math.random() * (max - min)
 
 interface Props {
   bium: Bium
@@ -20,6 +32,22 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
     return () => clearTimeout(t)
   }, [confirming])
 
+  const [drops, setDrops] = useState<Drop[]>([])
+  const nextDropId = useRef(0)
+  // 이모지가 들어갈 때마다 바뀌어 쓰레기통 흔들림 애니메이션을 다시 재생시킨다
+  const [landed, setLanded] = useState(0)
+
+  function handleToss(category: CategoryKey) {
+    onToss(category)
+    const drop = { id: nextDropId.current++, emoji: randomEmoji(category), x: rand(-50, 50), spin: rand(-270, 270) }
+    setDrops((d) => [...d, drop])
+  }
+
+  function handleLanded(id: number) {
+    setDrops((d) => d.filter((drop) => drop.id !== id))
+    setLanded((n) => n + 1)
+  }
+
   return (
     <main className="screen active">
       <header className="bar">
@@ -33,13 +61,27 @@ export function Active({ bium, onToss, onUndo, onFinish }: Props) {
       </header>
 
       <section className="bin" aria-live="polite">
-        <span className="bin-icon" aria-hidden>🗑️</span>
+        <div className="drop-zone" aria-hidden>
+          {drops.map((d) => (
+            <span
+              key={d.id}
+              className="drop"
+              style={{ '--x': `${d.x}px`, '--spin': `${d.spin}deg` } as CSSProperties}
+              onAnimationEnd={() => handleLanded(d.id)}
+            >
+              {d.emoji}
+            </span>
+          ))}
+        </div>
+        <span key={landed} className={landed > 0 ? 'bin-icon wobble' : 'bin-icon'} aria-hidden>
+          🗑️
+        </span>
         <strong className="bin-total">{stats.total}</strong>
       </section>
 
       <section className="cats">
         {CATEGORIES.map((c) => (
-          <button key={c.key} className="cat" onClick={() => onToss(c.key)}>
+          <button key={c.key} className="cat" onClick={() => handleToss(c.key)}>
             <span className="cat-icon" aria-hidden>{c.icon}</span>
             <span className="cat-label">{c.label}</span>
             <span className="cat-count">{stats.byCategory[c.key]}</span>
