@@ -16,14 +16,14 @@ export function daysInclusive(from: number, to: number): number {
   return Math.round((b.getTime() - a.getTime()) / 86_400_000) + 1
 }
 
-/** `10/26` */
-export function formatMD(t: number): string {
+/** `10월 26일` */
+export function formatKoreanMD(t: number): string {
   const d = new Date(t)
-  return `${d.getMonth() + 1}/${d.getDate()}`
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-/** `2026-10-27` → `10/27` */
+/** `2026-10-27` → `10월 27일` */
 export function formatDayKey(key: string): string {
   const [, m, d] = key.split('-')
-  return `${Number(m)}/${Number(d)}`
+  return `${Number(m)}월 ${Number(d)}일`
 }

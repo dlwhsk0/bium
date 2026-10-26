@@ -1,53 +1,47 @@
 /*
- * 컨셉: 아파트 분리수거장. 시멘트 바닥 위에 원색 수거함 4개.
- * 색은 수거함에만 쓰고 나머지는 바닥·잉크 두 톤으로 조용하게.
+ * 기준: 한국 핀테크 앱의 정돈된 화면(회색 바탕 위 흰 카드, 큰 숫자 + 작은 단위).
+ * 규칙
+ * - 포인트 색은 하나(--accent)만, 버튼에만 쓴다. 분류마다 색을 칠하지 않는다.
+ * - 3D 아이콘이 유일한 색이자 주인공. 나머지는 회색 단계로만 위계를 만든다.
+ * - 그라데이션, 큰 그림자, 테두리 장식, 스티커 없음.
+ * - 간격은 4의 배수, 화면 좌우 여백 20px, 카드 모서리 24px.
+ * - 강한 움직임은 "떨어져서 쌓이는" 한 곳에만.
  */
 :root {
-  --floor: #e3e8ea;
-  --floor-line: #cfd6d9;
-  --ink: #17212b;
-  --ink-soft: #5d6b75;
-  --sticker: #ffffff;
-  --danger: #d23c2f;
+  --bg: #f2f4f6;
+  --card: #ffffff;
+  --card-pressed: #f9fafb;
+  --text-1: #191f28;
+  --text-2: #4e5968;
+  --text-3: #8b95a1;
+  --line: #e5e8eb;
+  --accent: #2272eb;
+  --accent-text: #ffffff;
+  --danger: #f04452;
 
-  --display: 'Black Han Sans', 'Gothic A1', sans-serif;
-  --body: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  font-family: var(--body);
-  color: var(--ink);
-  background: var(--floor);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  color: var(--text-1);
+  background: var(--bg);
   color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  word-break: keep-all;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* 밤의 수거장: 가로등 아래 어두운 바닥 */
-    --floor: #11171c;
-    --floor-line: #232c33;
-    --ink: #e7edf0;
-    --ink-soft: #8b99a3;
-    --danger: #ff6b5c;
+    --bg: #101013;
+    --card: #1c1c21;
+    --card-pressed: #24242a;
+    --text-1: #f2f4f6;
+    --text-2: #b0b8c1;
+    --text-3: #6b7684;
+    --line: #2a2a31;
+    --accent: #3d86ff;
+    --danger: #ff5c69;
   }
-}
-
-/* 수거함 색 — 의류함 코발트, 소품 앰버, 화장품 핑크, 쓰레기 초록 */
-.bin-clothes {
-  --bin: #2f5fdc;
-  --bin-deep: #1d3f9e;
-}
-.bin-goods {
-  --bin: #f2a516;
-  --bin-deep: #b97606;
-}
-.bin-cosmetics {
-  --bin: #e8508c;
-  --bin-deep: #a92e60;
-}
-.bin-trash {
-  --bin: #2e9a62;
-  --bin-deep: #1d6b42;
 }
 
 * {
@@ -56,7 +50,7 @@
 
 body {
   margin: 0;
-  background: var(--floor);
+  background: var(--bg);
   overscroll-behavior: none; /* 당겨서 새로고침·출렁임 방지 */
 }
 
@@ -74,19 +68,25 @@ button {
 }
 
 button:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: default;
 }
 
 button:focus-visible {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 h1,
 h2,
-p {
+p,
+ul {
   margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
 }
 
 img {
@@ -95,106 +95,221 @@ img {
   -webkit-touch-callout: none;
 }
 
+/* ── 공통 ── */
 .screen {
   max-width: 480px;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: max(24px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+  padding: max(28px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   gap: 24px;
   text-align: center;
 }
 
-.primary {
-  width: 100%;
-  padding: 18px;
-  border-radius: 14px;
-  background: var(--ink);
-  color: var(--floor);
-  font-family: var(--display);
-  font-size: 1.25rem;
-  letter-spacing: 0.04em;
+.caption {
+  color: var(--text-3);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.primary:active {
-  transform: translateY(1px);
+.body {
+  color: var(--text-2);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
-.ghost {
-  padding: 12px 8px;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+.title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.big-number {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.unit {
+  margin-left: 4px;
+  color: var(--text-2);
+  font-size: 24px;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.ghost.danger {
+.card {
+  border-radius: 24px;
+  background: var(--card);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cta {
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 17px;
+  font-weight: 700;
+  transition:
+    transform 0.15s,
+    background-color 0.15s;
+}
+
+.cta:active {
+  transform: scale(0.98);
+}
+
+.cta.confirming {
+  background: var(--danger);
+}
+
+.text-button {
+  height: 44px;
+  color: var(--text-3);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.text-button.danger {
   color: var(--danger);
 }
 
-.period {
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+/* ── 홈 ── */
+.intro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.intro-icon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+}
+
+.result .intro-icon {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 4px;
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list {
+  padding: 4px 20px;
+}
+
+.list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.list-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 0;
+}
+
+.list-title {
+  font-size: 17px;
   font-weight: 700;
 }
 
-/* ── 개수 ── */
-.tally-total {
-  margin-top: 4px;
-  font-family: var(--display);
-  font-size: 5.5rem;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+.list-sub {
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.tally-unit {
-  font-weight: 700;
-}
-
-/* ── 수거함 ── */
-.yard {
+/* ── 비우는 중 ── */
+.bins {
+  flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(220px, 1fr);
+  gap: 12px;
 }
 
 .bin {
   position: relative;
-  display: block;
-  width: 100%;
-  height: 190px;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--card);
+  transition:
+    transform 0.15s,
+    background-color 0.15s;
 }
 
-button.bin:active .bin-front,
-button.bin:active .bin-back {
-  transform: scaleY(0.96);
+.bin:active {
+  transform: scale(0.97);
+  background: var(--card-pressed);
 }
 
-.bin-back,
-.bin-front {
+.bin-head {
   position: absolute;
-  transform-origin: 50% 100%;
-  transition: transform 0.08s;
+  top: 18px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
 }
 
-/* 안쪽 뒷벽: 앞판보다 높고 어둡다 */
-.bin-back {
-  left: 7%;
-  right: 7%;
-  bottom: 0;
-  height: 118px;
-  border-radius: 10px 10px 0 0;
-  background: var(--bin-deep);
+.bin-label {
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.bin-count {
+  display: inline-block;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.bin-count.bump {
+  animation: bump 0.3s var(--ease-spring);
+}
+
+@keyframes bump {
+  40% {
+    transform: scale(1.35);
+  }
 }
 
 .pile {
   position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 0;
-  bottom: 32px;
-  z-index: 1;
+  left: 12px;
+  right: 12px;
+  top: 52px;
+  bottom: 14px;
   pointer-events: none;
 }
 
@@ -203,29 +318,28 @@ button.bin:active .bin-back {
   width: 44px;
   height: 44px;
   transform: translateX(-50%) rotate(var(--r, 0deg));
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
+/* 카드 위쪽에서 떨어져 더미 위에 퐁 하고 안착 */
 .item.falling {
-  animation: fall 0.6s cubic-bezier(0.45, 0, 0.8, 0.5) both;
+  animation: fall 0.55s cubic-bezier(0.5, 0, 0.75, 0.4) both;
 }
 
-/* 위에서 떨어져 제자리에 톡 안착 */
 @keyframes fall {
   0% {
-    transform: translate(-50%, -260px) rotate(calc(var(--r, 0deg) - 160deg));
+    transform: translate(-50%, -200px) rotate(calc(var(--r, 0deg) - 120deg));
     opacity: 0;
   }
-  15% {
+  20% {
     opacity: 1;
   }
-  78% {
+  70% {
     transform: translate(-50%, 0) rotate(var(--r, 0deg));
     animation-timing-function: ease-out;
   }
-  90% {
-    transform: translate(-50%, -7px) rotate(var(--r, 0deg));
-    animation-timing-function: ease-in;
+  82% {
+    transform: translate(-50%, 2px) rotate(var(--r, 0deg)) scale(1.12, 0.86);
+    animation-timing-function: ease-in-out;
   }
   100% {
     transform: translate(-50%, 0) rotate(var(--r, 0deg));
@@ -234,15 +348,15 @@ button.bin:active .bin-back {
 
 /* 더미가 꽉 찼을 때: 떨어져서 더미 속으로 사라진다 */
 .item.vanishing {
-  animation: vanish 0.6s ease-in both;
+  animation: vanish 0.55s ease-in both;
 }
 
 @keyframes vanish {
   0% {
-    transform: translate(-50%, -200px) rotate(-120deg);
+    transform: translate(-50%, -160px) rotate(-90deg);
     opacity: 0;
   }
-  20% {
+  25% {
     opacity: 1;
   }
   80% {
@@ -255,178 +369,60 @@ button.bin:active .bin-back {
   }
 }
 
-/* 앞판: 낮아서 쌓인 게 보인다. 흰 라벨 스티커가 붙어 있다. */
-.bin-front {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px 6px 14px 14px;
-  background: var(--bin);
-  box-shadow:
-    inset 0 5px 0 rgba(255, 255, 255, 0.22),
-    0 6px 0 var(--bin-deep);
+/* ── 통계 ── */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 8px;
 }
 
-.sticker {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 5px 12px 4px;
-  border-radius: 6px;
-  background: var(--sticker);
-  color: #17212b;
-}
-
-.sticker-label {
-  font-weight: 800;
-  font-size: 0.9rem;
-}
-
-.sticker-count {
-  font-family: var(--display);
-  font-size: 1.15rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.controls {
-  margin-top: auto;
-  display: flex;
-  justify-content: center;
-  gap: 28px;
-}
-
-/* ── 홈 ── */
-.hero {
+.tile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding-top: 40px;
+  gap: 2px;
+  padding: 16px 8px;
 }
 
-.brand {
-  font-family: var(--display);
-  font-size: 4.5rem;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: 0.06em;
+.tile img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
 }
 
-.tagline {
-  color: var(--ink-soft);
-  font-weight: 700;
-  line-height: 1.5;
+.tile-label {
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.mini-yard {
-  display: flex;
-  gap: 10px;
-  margin-top: 28px;
-}
-
-.mini-bin {
-  position: relative;
-  width: 68px;
-  height: 78px;
-}
-
-.mini-bin img {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 44px;
-  transform: translateX(-50%) rotate(-8deg);
-}
-
-.mini-bin:nth-child(even) img {
-  transform: translateX(-50%) rotate(10deg);
-}
-
-.mini-front {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px 4px 10px 10px;
-  background: var(--bin);
-  box-shadow: 0 4px 0 var(--bin-deep);
-  color: #fff;
-  font-size: 0.8rem;
+.tile-count {
+  font-size: 20px;
   font-weight: 800;
 }
 
-.home .primary {
-  margin-top: 12px;
-}
-
-.history h2 {
-  margin-bottom: 10px;
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.history ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--floor-line);
-}
-
-.history-item {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--floor-line);
-}
-
-.history-period {
-  font-weight: 700;
-}
-
-.history-total {
-  font-family: var(--display);
-  font-size: 1.1rem;
-}
-
-/* ── 통계 ── */
 .best {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
-  color: var(--ink-soft);
-  font-weight: 700;
+  padding: 20px;
 }
 
-.best strong {
-  color: var(--ink);
-  font-family: var(--display);
-  font-size: 1.6rem;
-  font-weight: 400;
+.best-day {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.result-actions {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.best .body {
+  font-size: 15px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .item.falling,
-  .item.vanishing {
+  .item.vanishing,
+  .bin-count.bump {
     animation-duration: 0.01s;
   }
 }
