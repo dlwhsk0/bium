@@ -153,7 +153,7 @@ function ProfileEditor({ friend, onSave, onCancel }: { friend: Friend; onSave: (
     <main className="screen profile">
       <header className="summary">
         <h1 className="title">친구 프로필</h1>
-        <p className="body">하소연을 들어줄 친구의 사진과 이름을 정해요.</p>
+        <p className="body">내 얘기를 들어줄 친구의 사진과 이름을 정해요.</p>
       </header>
 
       <div className="profile-edit">

@@ -10,10 +10,10 @@ interface AppInfo {
   icon: string
 }
 
-// 앱 셋. 비움은 상자, 하소연은 채팅, 쪽지 버리기는 쓰레기통.
+// 앱 셋. 비움은 상자, 대나무숲(털어놓는 톡방)은 대나무, 쪽지 버리기는 쓰레기통.
 const APPS: AppInfo[] = [
   { id: 'bium', name: '비움', icon: '/icons/package.png' },
-  { id: 'vent', name: '하소연', icon: '/icons/speech.png' },
+  { id: 'vent', name: '대나무숲', icon: '/icons/bamboo.png' },
   { id: 'mind', name: '쪽지 버리기', icon: '/icons/wastebasket.png' },
 ]
 
