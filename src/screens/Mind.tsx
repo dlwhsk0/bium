@@ -67,7 +67,7 @@ export function Mind({ onBack }: Props) {
     <main className="screen mind">
       <BackButton onClick={onBack} />
       <header className="summary">
-        <h1 className="title">쪽지 버리기</h1>
+        <h1 className="title">버림</h1>
         <p className="body">
           버리고 싶은 생각이나 마음을 적어보세요.
           <br />
