@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { BackButton } from '../components/BackButton'
 import { seeded } from '../lib/packs'
 import { toAvatar } from '../lib/photo'
 import {
@@ -437,11 +438,7 @@ export function Vent({ onBack }: Props) {
   return (
     <main className={phase === 'bursting' ? 'chat shaking' : 'chat'}>
       <header className="chat-bar">
-        <button className="chat-back" onClick={onBack} aria-label="돌아가기" disabled={phase !== 'chatting'}>
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>
-            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <BackButton onClick={onBack} label="홈 화면으로" className="chat-back" />
         <button className="chat-title" onClick={openProfile} aria-label={`${friend.name}, 프로필 바꾸기`}>
           <Avatar photo={friend.photo} className="chat-title-photo" />
           <span>{friend.name}</span>

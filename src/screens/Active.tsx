@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { periodLabel, type Bium } from '../lib/bium'
 import { visibleCategories, type Category } from '../lib/categories'
 import { useTwoStep } from '../lib/useTwoStep'
+import { BackButton } from '../components/BackButton'
 import { Bin } from '../components/Bin'
 
 interface Props {
@@ -12,11 +13,11 @@ interface Props {
   onFinish: () => void
   /** 카드를 꾹 누르면 그 카테고리를 편집 */
   onEditCategory: (id: string) => void
-  onMind: () => void
-  onVent: () => void
+  /** 휴대폰 홈 화면으로 */
+  onExit: () => void
 }
 
-export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCategory, onMind, onVent }: Props) {
+export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCategory, onExit }: Props) {
   // 실수로 끝내지 않게 두 번 눌러야 끝난다
   const finishButton = useTwoStep(onFinish)
   // 화면을 연 뒤에 넣은 것만 떨어지게 한다. 이미 쌓여 있던 건 그대로 둔다.
@@ -29,6 +30,7 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
 
   return (
     <main className="screen active">
+      <BackButton onClick={onExit} />
       <header className="summary">
         <p className="caption">{periodLabel(bium)}</p>
         <p className="big-number" aria-live="polite">
@@ -51,17 +53,9 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
       </section>
 
       <footer className="actions">
-        <div className="text-buttons">
-          <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
-            되돌리기
-          </button>
-          <button className="text-button" onClick={onMind}>
-            마음 비우기
-          </button>
-          <button className="text-button" onClick={onVent}>
-            하소연하기
-          </button>
-        </div>
+        <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
+          방금 넣은 것 되돌리기
+        </button>
         <button
           className={finishButton.confirming ? 'cta confirming' : 'cta'}
           onClick={finishButton.press}

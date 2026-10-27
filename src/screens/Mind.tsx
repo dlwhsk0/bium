@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties } from 'react'
+import { BackButton } from '../components/BackButton'
 import { loadMindCount, saveMindCount } from '../lib/storage'
 
 interface Props {
@@ -64,8 +65,9 @@ export function Mind({ onBack }: Props) {
 
   return (
     <main className="screen mind">
+      <BackButton onClick={onBack} />
       <header className="summary">
-        <h1 className="title">마음 비우기</h1>
+        <h1 className="title">쪽지 버리기</h1>
         <p className="body">
           버리고 싶은 생각이나 마음을 적어보세요.
           <br />
@@ -114,9 +116,6 @@ export function Mind({ onBack }: Props) {
 
       <footer className="actions">
         <p className="caption mind-count">{count > 0 && `지금까지 마음 ${count}개를 버렸어요`}</p>
-        <button className="text-button" onClick={onBack} disabled={phase === 'crumpling' || phase === 'throwing'}>
-          돌아가기
-        </button>
         <button className="cta" onClick={throwAway} disabled={!text.trim() || phase !== 'writing'}>
           구겨서 버리기
         </button>

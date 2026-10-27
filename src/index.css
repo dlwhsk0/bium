@@ -623,41 +623,155 @@ img {
   color: var(--text-2);
 }
 
-/* 홈의 마음 비우기 / 하소연하기 타일 */
-.mind-tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.corner-button.left {
+  left: 12px;
+  right: auto;
 }
 
-.mind-tile {
+/* ── 휴대폰 홈 화면(런처) ── */
+.launcher {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  /* 넓은 화면에서도 휴대폰 폭(480px)만큼만 쓴다 */
+  padding: max(32px, env(safe-area-inset-top)) max(24px, calc((100% - 432px) / 2)) max(24px, env(safe-area-inset-bottom));
+  color: #ffffff;
+  background: linear-gradient(170deg, #9bb5f6 0%, #c3b4ee 55%, #efc4d6 100%);
+}
+
+.launcher.android {
+  background: linear-gradient(180deg, #a9d3bc 0%, #6fa98b 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .launcher {
+    background: linear-gradient(170deg, #1d2645 0%, #34295a 60%, #4a2c47 100%);
+  }
+
+  .launcher.android {
+    background: linear-gradient(180deg, #1c2a24 0%, #2d4639 100%);
+  }
+}
+
+.widget p {
+  margin: 0;
+}
+
+/* 아이폰: 흐린 유리 카드 위젯 */
+.launcher.ios .widget {
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.widget-time {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.widget-date {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.widget-note {
+  margin-top: 10px !important;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* 안드로이드: 카드 없이 큰 시계 */
+.launcher.android .widget {
+  padding: 8px 4px;
+  text-align: left;
+}
+
+.launcher.android .widget-time {
+  font-size: 64px;
+  font-weight: 300;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 12px;
+}
+
+.app {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 14px 8px;
+  gap: 6px;
+  color: inherit;
+}
+
+.app-icon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px; /* 아이폰 앱 아이콘 모서리 비율 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   transition: transform 0.15s;
 }
 
-.mind-tile:active {
-  transform: scale(0.97);
+.launcher.android .app-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
 }
 
-.mind-tile img {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 4px;
+.app:active .app-icon {
+  transform: scale(0.9);
 }
 
-.mind-tile-title {
-  font-size: 16px;
-  font-weight: 700;
+.app-icon img {
+  width: 68%;
+  height: 68%;
 }
 
-.mind-tile-sub {
-  color: var(--text-3);
-  font-size: 13px;
+.app-bium {
+  background: #3d7ef0;
+}
+
+.app-vent {
+  background: #ffe14d;
+}
+
+.app-mind {
+  background: #2d323b;
+}
+
+.app-name {
+  font-size: 12px;
   font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+/* 앱 창: 누른 아이콘 자리에서 커지며 열린다 */
+.app-window {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+  animation: app-open 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes app-open {
+  from {
+    transform: scale(0.12);
+    opacity: 0;
+    border-radius: 40px;
+  }
 }
 
 /* 아래에서 올라오는 시트 */
@@ -723,46 +837,6 @@ img {
 }
 
 /* ── 마음 비우기 ── */
-.mind-entry {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 0;
-  transition: transform 0.15s;
-}
-
-.mind-entry + .mind-entry {
-  border-top: 1px solid var(--line);
-}
-
-.mind-entry:active {
-  transform: scale(0.98);
-}
-
-.mind-entry img {
-  width: 44px;
-  height: 44px;
-}
-
-.mind-entry-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.mind-entry-title {
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.mind-entry-sub {
-  color: var(--text-3);
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .paper-area {
   flex: 1;
   min-height: 140px;
@@ -1698,7 +1772,8 @@ img.is-photo {
   .burst-flash,
   .drawer,
   .drawer-backdrop,
-  .dialog-backdrop {
+  .dialog-backdrop,
+  .app-window {
     animation: none;
   }
 
