@@ -24,16 +24,24 @@ type Phase = 'chatting' | 'profile' | 'bursting' | 'burst'
 
 const MAX_NAME = 10
 const BURST_MS = 1100
-const DEFAULT_PHOTO = '/icons/wastebasket.png'
 // 친구는 먼저 말을 걸지 않는다. 내가 보낼 때마다 이 확률로 리액션을 마음먹는다 — 말하는 중간에도 불쑥.
-const REPLY_CHANCE = 0.3
-// 보내면 1이 떴다가 이 사이 랜덤한 때에 친구가 읽는다(그때까지 쌓인 1이 한꺼번에 사라짐).
-// 리액션은 읽은 뒤에만, 조금 있다가 온다.
+const REPLY_CHANCE = 0.25
+// 이만큼 말하기 전엔 끼어들지 않는다 — 방을 연 첫마디부터, 리액션한 직후에도 한동안은 그냥 들어준다
+const QUIET_MESSAGES = 4
+// 보낸 말의 1은 보통 친구가 답하기로 했을 때만 사라진다. 답하기로 하면 이 사이 랜덤한 때에
+// 읽고(쌓인 1이 한꺼번에 사라짐) 곧바로 답한다. 가끔은 읽기만 한다(읽씹).
+const IGNORE_CHANCE = 0.1
+// 내 말에 '읽씹'이 들어가면 무조건 빨리 읽고 아니라고 해명한다
+const IGNORE_WORD = '읽씹'
+const DENY_READ_MS: [number, number] = [300, 900]
+const DENIALS = ['아니 읽씹 아님 ㅋㅋ', '읽씹 아니야 듣고 있었어', '헐 아냐 다 읽고 있었어 계속 말해', '읽씹은 무슨 ㅋㅋ 니 말 다 듣는 중', '아 미안 읽씹 아님 ㅠ 계속해']
 const READ_MS: [number, number] = [400, 2000]
 const REPLY_AFTER_READ_MS: [number, number] = [300, 800]
 const between = ([min, max]: [number, number]) => min + Math.random() * (max - min)
 
 const rollReply = () => Math.random() < REPLY_CHANCE
+const rollIgnore = () => Math.random() < IGNORE_CHANCE
+const pickDenial = () => DENIALS[Math.floor(Math.random() * DENIALS.length)]
 
 const markRead = (m: VentMessage): VentMessage => (m.from === 'me' && !m.read ? { ...m, read: true } : m)
 
@@ -95,6 +103,19 @@ const dateLabel = (t: number) => {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`
 }
 
+/** 프로필 사진. 사진이 없으면 기본 사람 실루엣. */
+function Avatar({ photo, className }: { photo: string | null; className: string }) {
+  if (photo) return <img className={`${className} is-photo`} src={photo} alt="" draggable={false} />
+  return (
+    <span className={`${className} default-avatar`} aria-hidden>
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="9.5" r="4.2" fill="currentColor" />
+        <path d="M3.5 22c0-4.6 3.8-7.3 8.5-7.3s8.5 2.7 8.5 7.3z" fill="currentColor" />
+      </svg>
+    </span>
+  )
+}
+
 /** 친구 프로필 사진과 이름 정하기 */
 function ProfileEditor({ friend, onSave, onCancel }: { friend: Friend; onSave: (f: Friend) => void; onCancel: () => void }) {
   const [name, setName] = useState(friend.name)
@@ -111,7 +132,7 @@ function ProfileEditor({ friend, onSave, onCancel }: { friend: Friend; onSave: (
 
       <div className="profile-edit">
         <button className="profile-photo" onClick={() => fileInput.current?.click()} aria-label="프로필 사진 고르기">
-          <img src={photo ?? DEFAULT_PHOTO} alt="" draggable={false} className={photo ? 'is-photo' : ''} />
+          <Avatar photo={photo} className="profile-avatar" />
         </button>
         <div className="text-buttons">
           <button className="text-button" onClick={() => fileInput.current?.click()}>
@@ -172,6 +193,7 @@ export function Vent({ onBack }: Props) {
   const [openedAt, setOpenedAt] = useState(() => saved?.openedAt ?? Date.now())
   // 오른쪽 위 메뉴(서랍): 프로필 수정, 방 나가기
   const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmLeave, setConfirmLeave] = useState(false)
   const nextId = useRef(Math.max(-1, ...(saved?.messages ?? []).map((m) => m.id)) + 1)
   const lastReply = useRef(-1)
   const listRef = useRef<HTMLDivElement>(null)
@@ -181,6 +203,10 @@ export function Vent({ onBack }: Props) {
   const replyTimers = useRef<number[]>([])
   // 읽고 나면 리액션할지 (보낸 말 중 하나라도 리액션을 마음먹었으면)
   const wantsReply = useRef(false)
+  // 이번에 할 답. null이면 REPLIES에서 랜덤(읽씹 해명은 미리 정해 둔다)
+  const replyText = useRef<string | null>(null)
+  // 마지막 리액션(또는 방을 연 뒤)부터 내가 보낸 말 수
+  const sinceReply = useRef(0)
 
   const stopFriend = () => {
     if (readTimer.current !== null) clearTimeout(readTimer.current)
@@ -188,6 +214,8 @@ export function Vent({ onBack }: Props) {
     replyTimers.current.forEach(clearTimeout)
     replyTimers.current = []
     wantsReply.current = false
+    replyText.current = null
+    sinceReply.current = 0
   }
 
   useEffect(
@@ -203,29 +231,27 @@ export function Vent({ onBack }: Props) {
     saveVentChat(messages.length > 0 ? { openedAt, messages } : null)
   }, [messages, openedAt])
 
-  // 친구가 쌓인 내 말을 한꺼번에 읽는다(1이 사라짐). 리액션을 마음먹었으면 조금 있다 답한다.
+  // 친구가 쌓인 내 말을 한꺼번에 읽는다(1이 사라짐). 답하기로 했으면 조금 있다 답하고, 아니면 읽씹.
   // ref와 setState만 쓰므로 한 번 만들어 두고 계속 쓴다.
-  const readAll = useCallback(() => {
+  const friendReads = useCallback(() => {
     readTimer.current = null
     setMessages((m) => m.map(markRead))
     if (!wantsReply.current) return
     wantsReply.current = false
     replyTimers.current.push(
       window.setTimeout(() => {
-        const r = pickReply(lastReply.current)
-        lastReply.current = r
+        let text = replyText.current
+        replyText.current = null
+        if (text === null) {
+          const r = pickReply(lastReply.current)
+          lastReply.current = r
+          text = REPLIES[r]
+        }
         // 답하기 전에 그 사이 새로 보낸 말까지 다 읽는다 — 1이 남은 채로 답이 오지 않게
-        setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text: REPLIES[r], at: Date.now() }])
+        setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text, at: Date.now() }])
       }, between(REPLY_AFTER_READ_MS)),
     )
   }, [])
-
-  // 새로고침 전에 친구가 안 읽은 말이 있었으면 이어서 읽는다(처음 열 때 한 번)
-  useEffect(() => {
-    if (saved?.messages.some((m) => m.from === 'me' && !m.read)) {
-      readTimer.current = window.setTimeout(readAll, between(READ_MS))
-    }
-  }, [saved, readAll])
 
   // 새 말풍선이 생기면 맨 아래로
   useEffect(() => {
@@ -239,9 +265,28 @@ export function Vent({ onBack }: Props) {
     setDraft('')
     inputRef.current?.focus()
 
-    if (rollReply()) wantsReply.current = true
-    // 친구가 아직 안 읽었으면 그 읽기 타이머에 같이 묶인다
-    if (readTimer.current === null) readTimer.current = window.setTimeout(readAll, between(READ_MS))
+    sinceReply.current++
+
+    // '읽씹'이라고 하면 무조건 빨리 읽고 아니라고 한다(조용히 들어주는 중이어도)
+    if (text.includes(IGNORE_WORD)) {
+      wantsReply.current = true
+      replyText.current = pickDenial()
+      sinceReply.current = 0
+      if (readTimer.current !== null) clearTimeout(readTimer.current)
+      readTimer.current = window.setTimeout(friendReads, between(DENY_READ_MS))
+      return
+    }
+
+    // 이미 읽으려는 중이면 이번 말도 그때 같이 읽힌다
+    if (readTimer.current !== null || sinceReply.current <= QUIET_MESSAGES) return
+    if (rollReply()) {
+      wantsReply.current = true
+      sinceReply.current = 0
+      readTimer.current = window.setTimeout(friendReads, between(READ_MS))
+    } else if (rollIgnore()) {
+      // 읽씹: 읽기만 하고 답은 안 한다
+      readTimer.current = window.setTimeout(friendReads, between(READ_MS))
+    }
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -254,6 +299,7 @@ export function Vent({ onBack }: Props) {
 
   /** 방 나가기: 한 말이 있으면 방을 터트리고, 없으면 그냥 나간다 */
   function leave() {
+    setConfirmLeave(false)
     setMenuOpen(false)
     if (messages.length === 0) onBack()
     else burst()
@@ -319,7 +365,6 @@ export function Vent({ onBack }: Props) {
     )
   }
 
-  const avatar = friend.photo ?? DEFAULT_PHOTO
   const openProfile = () => phase === 'chatting' && setPhase('profile')
 
   return (
@@ -331,7 +376,7 @@ export function Vent({ onBack }: Props) {
           </svg>
         </button>
         <button className="chat-title" onClick={openProfile} aria-label={`${friend.name}, 프로필 바꾸기`}>
-          <img className={friend.photo ? 'chat-title-photo is-photo' : 'chat-title-photo'} src={avatar} alt="" draggable={false} />
+          <Avatar photo={friend.photo} className="chat-title-photo" />
           <span>{friend.name}</span>
         </button>
         <button
@@ -349,25 +394,62 @@ export function Vent({ onBack }: Props) {
 
       {menuOpen && (
         <div className="drawer-backdrop" onClick={() => setMenuOpen(false)}>
-          <nav className="drawer" onClick={(e) => e.stopPropagation()} aria-label="채팅방 메뉴">
-            <div className="drawer-friend">
-              <img className={friend.photo ? 'drawer-photo is-photo' : 'drawer-photo'} src={avatar} alt="" draggable={false} />
-              <span className="drawer-name">{friend.name}</span>
-            </div>
-            <button
-              className="drawer-item"
-              onClick={() => {
-                setMenuOpen(false)
-                openProfile()
-              }}
-            >
-              프로필 수정
-            </button>
-            <button className="drawer-item danger" onClick={leave}>
-              방 나가기
-              {messages.length > 0 && <span className="drawer-hint">한 말은 방과 함께 터져서 사라져요</span>}
-            </button>
+          <nav className="drawer" onClick={(e) => e.stopPropagation()} aria-label="채팅방 서랍">
+            <h2 className="drawer-title">채팅방 서랍</h2>
+
+            <section className="drawer-section">
+              <h3 className="drawer-label">
+                대화상대 <span>2</span>
+              </h3>
+              <button
+                className="member"
+                onClick={() => {
+                  setMenuOpen(false)
+                  openProfile()
+                }}
+              >
+                <Avatar photo={friend.photo} className="member-photo" />
+                <span className="member-name">{friend.name}</span>
+                <span className="member-action">프로필 수정</span>
+              </button>
+              <div className="member">
+                <Avatar photo={null} className="member-photo" />
+                <span className="member-badge">나</span>
+              </div>
+            </section>
+
+            <footer className="drawer-bottom">
+              <button className="drawer-icon-button" onClick={() => (messages.length ? setConfirmLeave(true) : leave())} aria-label="채팅방 나가기">
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>
+                  <path
+                    d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </footer>
           </nav>
+        </div>
+      )}
+
+      {confirmLeave && (
+        <div className="dialog-backdrop" onClick={() => setConfirmLeave(false)}>
+          <div className="dialog" role="alertdialog" aria-labelledby="leave-title" onClick={(e) => e.stopPropagation()}>
+            <h2 id="leave-title" className="dialog-title">
+              채팅방 나가기
+            </h2>
+            <p className="dialog-body">나가기를 하면 대화 내용이 방과 함께 터져서 모두 사라져요.</p>
+            <div className="dialog-actions">
+              <button onClick={() => setConfirmLeave(false)}>취소</button>
+              <button className="dialog-confirm" onClick={leave}>
+                나가기
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -382,11 +464,11 @@ export function Vent({ onBack }: Props) {
             animationDelay: `${seeded(m.id + 4) * 150}ms`,
           } as CSSProperties
           return (
-            <div key={m.id} className={`msg ${m.from}`} style={style}>
+            <div key={m.id} className={`msg ${m.from}${messages[i - 1] && messages[i - 1].from !== m.from ? ' turn' : ''}`} style={style}>
               {m.from === 'friend' &&
                 (showFriend ? (
                   <button className="msg-avatar-button" onClick={openProfile} aria-label={`${friend.name} 프로필 바꾸기`}>
-                    <img className={friend.photo ? 'msg-avatar is-photo' : 'msg-avatar'} src={avatar} alt="" draggable={false} />
+                    <Avatar photo={friend.photo} className="msg-avatar" />
                   </button>
                 ) : (
                   <span className="msg-avatar" />
@@ -394,7 +476,7 @@ export function Vent({ onBack }: Props) {
               <div className="msg-body">
                 {showFriend && <span className="msg-name">{friend.name}</span>}
                 <div className="msg-line">
-                  <p className="bubble">{m.text}</p>
+                  <p className={messages[i - 1]?.from !== m.from ? 'bubble tail' : 'bubble'}>{m.text}</p>
                   <span className="msg-meta">
                     {m.from === 'me' && !m.read && <span className="msg-unread">1</span>}
                     <span className="msg-time">{timeLabel(m.at)}</span>
