@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { BackButton } from '../components/BackButton'
+import { Emoji } from '../components/Emoji'
 import { Sheet } from '../components/Sheet'
 import { periodLabel, type Bium } from '../lib/bium'
 
@@ -52,7 +53,7 @@ export function Home(props: Props) {
       </button>
 
       <div className="intro">
-        <img className="intro-icon" src="/icons/package-lg.png" alt="" draggable={false} />
+        <Emoji name="package" className="intro-icon" />
         <h1 className="title">비움</h1>
         <p className="body">
           버릴 물건을 하나씩 넣으면

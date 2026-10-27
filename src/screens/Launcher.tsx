@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import type { Platform } from '../lib/platform'
 import { BiumWidget } from '../components/BiumWidget'
+import { Emoji } from '../components/Emoji'
 import { Sheet } from '../components/Sheet'
 import { useLongPress } from '../lib/useLongPress'
 import { startBium, toss } from '../lib/bium'
@@ -11,16 +12,16 @@ export type AppId = 'bium' | 'vent' | 'mind' | 'settings'
 interface AppInfo {
   id: AppId
   name: string
+  /** lib/emoji.ts의 이모지 이름 */
   icon: string
 }
 
 // 앱 셋. 비움은 상자, Chat(털어놓는 톡방)은 둥근 말풍선, 버림은 쓰레기통.
-// 말풍선은 3dicons(CC0)의 chat clay — Fluent 말풍선은 동그랗지 않아서.
 const APPS: AppInfo[] = [
-  { id: 'bium', name: '비움', icon: '/icons/package.png' },
-  { id: 'vent', name: 'Chat', icon: '/icons/chat.png' },
-  { id: 'mind', name: '버림', icon: '/icons/wastebasket.png' },
-  { id: 'settings', name: '설정', icon: '/icons/gear.png' },
+  { id: 'bium', name: '비움', icon: 'package' },
+  { id: 'vent', name: 'Chat', icon: 'chat' },
+  { id: 'mind', name: '버림', icon: 'wastebasket' },
+  { id: 'settings', name: '설정', icon: 'gear' },
 ]
 
 
@@ -120,7 +121,7 @@ export function Launcher(props: Props) {
         {APPS.map((a) => (
           <button key={a.id} className="app" onClick={open(a.id)}>
             <span className={`app-icon app-${a.id}`}>
-              <img src={a.icon} alt="" draggable={false} />
+              <Emoji name={a.icon} />
             </span>
             <span className="app-name">{a.name}</span>
           </button>

@@ -3,6 +3,7 @@ import type { Toss } from '../lib/bium'
 import { DEFAULT_CATEGORIES } from '../lib/categories'
 import { iconFor, seeded } from '../lib/packs'
 import { Bin } from '../components/Bin'
+import { Emoji } from '../components/Emoji'
 import { ROW_H, slot } from '../lib/pile'
 import { buzz } from '../lib/haptics'
 
@@ -34,12 +35,10 @@ function MessyRoom() {
   return (
     <div className="ob-stage">
       {things.map(([icon, x, y, r], i) => (
-        <img
+        <Emoji
           key={icon}
+          name={icon}
           className="ob-thing"
-          src={`/icons/${icon}.png`}
-          alt=""
-          draggable={false}
           style={{ '--x': `${x}px`, '--y': `${y}px`, '--r': `${r}deg`, animationDelay: `${i * 60}ms` } as CSSProperties}
         />
       ))}
@@ -51,7 +50,7 @@ function MessyRoom() {
 function OneTissue() {
   return (
     <div className="ob-stage">
-      <img className="ob-hero-icon floating" src="/icons/tissue-lg.png" alt="" draggable={false} />
+      <Emoji name="tissue" className="ob-hero-icon floating" />
       <span className="ob-shadow" />
     </div>
   )
@@ -73,7 +72,7 @@ function OneByOne() {
               '--r': `${(seeded(at + 3) - 0.5) * 50}deg`,
               animationDelay: `${200 + i * 140}ms`,
             } as CSSProperties
-            return <img key={i} className="item falling" src={iconFor('clothes', at)} alt="" style={style} draggable={false} />
+            return <Emoji key={i} name={iconFor('clothes', at)} className="item falling" style={style} />
           })}
         </span>
       </div>
@@ -110,8 +109,8 @@ function TryIt() {
 function Sparkling() {
   return (
     <div className="ob-stage">
-      <img className="ob-hero-icon" src="/icons/broom.png" alt="" draggable={false} />
-      <img className="ob-sparkle" src="/icons/sparkles.png" alt="" draggable={false} />
+      <Emoji name="broom" className="ob-hero-icon" />
+      <Emoji name="sparkles" className="ob-sparkle" />
     </div>
   )
 }

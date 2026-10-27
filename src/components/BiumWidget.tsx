@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { Bium } from '../lib/bium'
 import { labelOf, visibleCategories, type Category } from '../lib/categories'
-import { coverUrl } from '../lib/packs'
+import { coverOf } from '../lib/packs'
+import { Emoji } from './Emoji'
 import { useLongPress } from '../lib/useLongPress'
 import { buzz } from '../lib/haptics'
 
@@ -20,7 +21,7 @@ function Cell(props: { label: string; cover: string; count: number; hop: number 
   const press = useLongPress(props.onToss, props.onSettings)
   return (
     <button className="bium-widget-cell" {...press} aria-label={`${props.label}에 넣기, 지금 ${props.count}개. 꾹 누르면 위젯 설정`}>
-      <img key={props.hop ?? 0} className={props.hop !== null ? 'hop' : ''} src={props.cover} alt="" draggable={false} />
+      <Emoji key={props.hop ?? 0} name={props.cover} className={props.hop !== null ? 'cell-icon hop' : 'cell-icon'} />
       <span className="bium-widget-label">{props.label}</span>
       <span className="bium-widget-count">{props.count}</span>
     </button>
@@ -48,7 +49,7 @@ export function BiumWidget({ active, categories, size, onToss, onSettings }: Pro
           <Cell
             key={c.id}
             label={labelOf(c)}
-            cover={coverUrl(c.pack)}
+            cover={coverOf(c.pack)}
             count={count(c.id)}
             hop={hop?.id === c.id ? hop.n : null}
             onToss={() => {

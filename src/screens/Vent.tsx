@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { BackButton } from '../components/BackButton'
+import { Emoji } from '../components/Emoji'
 import { seeded } from '../lib/packs'
 import { toAvatar } from '../lib/photo'
 import {
@@ -421,7 +422,7 @@ export function Vent({ onBack }: Props) {
     return (
       <main className="screen vent-burst">
         <div className="intro">
-          <img className="intro-icon burst-pop" src="/icons/collision.png" alt="" draggable={false} />
+          <Emoji name="collision" className="intro-icon burst-pop" />
           <h1 className="title">방이 터졌어요</h1>
           <p className="body">
             했던 말은 하나도 남지 않았어요.
@@ -564,7 +565,7 @@ export function Vent({ onBack }: Props) {
             </div>
           )
         })}
-        {phase === 'bursting' && <img className="burst-flash" src="/icons/collision.png" alt="" draggable={false} />}
+        {phase === 'bursting' && <Emoji name="collision" className="burst-flash" />}
       </div>
 
       <footer className="chat-input">

@@ -1,5 +1,6 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { BackButton } from '../components/BackButton'
+import { Emoji } from '../components/Emoji'
 import { loadMindCount, saveMindCount } from '../lib/storage'
 import { buzz } from '../lib/haptics'
 
@@ -31,7 +32,7 @@ export function Mind({ onBack }: Props) {
   // 공이 날아갈 거리: 종이 가운데 → 쓰레기통 입구
   const [flight, setFlight] = useState({ dx: 0, dy: 0 })
   const paperRef = useRef<HTMLDivElement>(null)
-  const binRef = useRef<HTMLImageElement>(null)
+  const binRef = useRef<HTMLSpanElement>(null)
 
   function throwAway() {
     if (!text.trim() || phase !== 'writing') return
@@ -106,14 +107,9 @@ export function Mind({ onBack }: Props) {
         )}
       </div>
 
-      <img
-        ref={binRef}
-        key={count}
-        className={count > 0 && phase === 'done' ? 'mind-bin wobble' : 'mind-bin'}
-        src="/icons/wastebasket.png"
-        alt=""
-        draggable={false}
-      />
+      <span ref={binRef} key={count} className={count > 0 && phase === 'done' ? 'mind-bin wobble' : 'mind-bin'}>
+        <Emoji name="wastebasket" />
+      </span>
 
       <footer className="actions">
         <p className="caption mind-count">{count > 0 && `지금까지 마음 ${count}개를 버렸어요`}</p>

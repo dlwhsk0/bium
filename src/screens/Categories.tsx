@@ -10,7 +10,8 @@ import {
   visibleCategories,
   type Category,
 } from '../lib/categories'
-import { coverUrl, getPack, iconUrl, type PackKey, PACKS, previewIcons } from '../lib/packs'
+import { coverOf, getPack, type PackKey, PACKS, previewIcons } from '../lib/packs'
+import { Emoji } from '../components/Emoji'
 import { useTwoStep } from '../lib/useTwoStep'
 import { Sheet } from '../components/Sheet'
 
@@ -80,7 +81,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
                   aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
                   aria-haspopup="dialog"
                 >
-                  <img src={coverUrl(c.pack)} alt="" draggable={false} />
+                  <Emoji name={coverOf(c.pack)} className="thumb-icon" />
                 </button>
                 <input
                   className="label-input"
@@ -118,7 +119,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
               >
                 <span className="pack-icons">
                   {previewIcons(p.key).map((slug) => (
-                    <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
+                    <Emoji key={slug} name={slug} className="preview-icon" />
                   ))}
                 </span>
                 <span className="pack-name">{p.name}</span>
