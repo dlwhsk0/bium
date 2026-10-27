@@ -77,3 +77,33 @@ export function loadFriend(): Friend {
   }
 }
 export const saveFriend = (f: Friend) => write(FRIEND_KEY, f)
+
+const VENT_CHAT_KEY = 'bium:vent-chat'
+
+/** 하소연 톡방 말풍선. read는 내 말풍선만(친구가 읽었는지). */
+export interface VentMessage {
+  id: number
+  from: 'me' | 'friend'
+  text: string
+  at: number
+  read?: boolean
+}
+
+/**
+ * 나가기(방 터트리기) 전까지의 대화. 새로고침해도 이어지고, 방을 나가면 지운다.
+ * 이 기기 안에만 있고 백업 파일에는 넣지 않는다.
+ */
+export interface VentChat {
+  openedAt: number
+  messages: VentMessage[]
+}
+
+export function loadVentChat(): VentChat | null {
+  const raw = read<VentChat | null>(VENT_CHAT_KEY, null)
+  if (!raw || typeof raw.openedAt !== 'number' || !Array.isArray(raw.messages)) return null
+  const messages = raw.messages.filter(
+    (m) => typeof m?.id === 'number' && (m.from === 'me' || m.from === 'friend') && typeof m.text === 'string' && typeof m.at === 'number',
+  )
+  return { openedAt: raw.openedAt, messages }
+}
+export const saveVentChat = (chat: VentChat | null) => write(VENT_CHAT_KEY, chat)

@@ -1,18 +1,23 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { seeded } from '../lib/packs'
 import { toAvatar } from '../lib/photo'
-import { DEFAULT_FRIEND, loadBurstCount, loadFriend, saveBurstCount, saveFriend, type Friend } from '../lib/storage'
+import {
+  DEFAULT_FRIEND,
+  loadBurstCount,
+  loadFriend,
+  loadVentChat,
+  saveBurstCount,
+  saveFriend,
+  saveVentChat,
+  type Friend,
+  type VentMessage,
+} from '../lib/storage'
 
 interface Props {
   onBack: () => void
 }
 
-interface Message {
-  id: number
-  from: 'me' | 'friend'
-  text: string
-  at: number
-}
+type Message = VentMessage
 
 /** chatting: 톡하는 중 / profile: 친구 프로필 바꾸는 중 / bursting: 말풍선이 사방으로 터지는 중 / burst: 방이 터진 뒤 */
 type Phase = 'chatting' | 'profile' | 'bursting' | 'burst'
@@ -20,10 +25,41 @@ type Phase = 'chatting' | 'profile' | 'bursting' | 'burst'
 const MAX_NAME = 10
 const BURST_MS = 1100
 const DEFAULT_PHOTO = '/icons/wastebasket.png'
-// 친구는 먼저 말을 걸지 않는다. 내가 보낼 때마다 이 확률로 바로 끼어든다 — 말하는 중간에도 불쑥.
-const REPLY_CHANCE = 0.5
-// 찐친 리액션: 무조건 내 편, 같이 욕해준다
+// 친구는 먼저 말을 걸지 않는다. 내가 보낼 때마다 이 확률로 리액션을 마음먹는다 — 말하는 중간에도 불쑥.
+const REPLY_CHANCE = 0.3
+// 보내면 1이 떴다가 이 사이 랜덤한 때에 친구가 읽는다(그때까지 쌓인 1이 한꺼번에 사라짐).
+// 리액션은 읽은 뒤에만, 조금 있다가 온다.
+const READ_MS: [number, number] = [400, 2000]
+const REPLY_AFTER_READ_MS: [number, number] = [300, 800]
+const between = ([min, max]: [number, number]) => min + Math.random() * (max - min)
+
+const rollReply = () => Math.random() < REPLY_CHANCE
+
+const markRead = (m: VentMessage): VentMessage => (m.from === 'me' && !m.read ? { ...m, read: true } : m)
+
+/** 리액션 하나 고르기. 바로 전 것(last)과 같은 건 피한다. */
+function pickReply(last: number) {
+  const r = Math.floor(Math.random() * REPLIES.length)
+  return r === last ? (r + 1) % REPLIES.length : r
+}
+// 찐친 리액션: 무조건 내 편, 같이 욕해준다. 진짜 톡처럼 짧은 것도 섞는다.
 const REPLIES = [
+  'ㅇㅇ',
+  ';;',
+  'ㅁㅊ?',
+  '아 에바',
+  'ㄹㅇ',
+  'ㅋㅋㅋㅋㅋ',
+  '헐',
+  'ㅠㅠ',
+  'ㄷㄷ',
+  '개에바',
+  '???',
+  'ㅇㅈ',
+  'ㅂㄷㅂㄷ',
+  '실화냐',
+  '그니까',
+  '와',
   '와 미친 거 아냐?',
   'ㅅㅂ 듣는 내가 다 빡치네',
   '걔가 이상한 거야 100%',
@@ -126,26 +162,70 @@ function ProfileEditor({ friend, onSave, onCancel }: { friend: Friend; onSave: (
 }
 
 export function Vent({ onBack }: Props) {
-  const [messages, setMessages] = useState<Message[]>([])
+  // 나가기 전까지의 대화는 브라우저에 남아 있어 새로고침해도 이어진다
+  const [saved] = useState(loadVentChat)
+  const [messages, setMessages] = useState<Message[]>(saved?.messages ?? [])
   const [draft, setDraft] = useState('')
   const [phase, setPhase] = useState<Phase>('chatting')
   const [friend, setFriend] = useState(loadFriend)
   const [count, setCount] = useState(loadBurstCount)
-  const [openedAt] = useState(() => Date.now())
+  const [openedAt, setOpenedAt] = useState(() => saved?.openedAt ?? Date.now())
   // 오른쪽 위 메뉴(서랍): 프로필 수정, 방 나가기
   const [menuOpen, setMenuOpen] = useState(false)
-  const nextId = useRef(0)
+  const nextId = useRef(Math.max(-1, ...(saved?.messages ?? []).map((m) => m.id)) + 1)
   const lastReply = useRef(-1)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const burstTimer = useRef<number | null>(null)
+  const readTimer = useRef<number | null>(null)
+  const replyTimers = useRef<number[]>([])
+  // 읽고 나면 리액션할지 (보낸 말 중 하나라도 리액션을 마음먹었으면)
+  const wantsReply = useRef(false)
+
+  const stopFriend = () => {
+    if (readTimer.current !== null) clearTimeout(readTimer.current)
+    readTimer.current = null
+    replyTimers.current.forEach(clearTimeout)
+    replyTimers.current = []
+    wantsReply.current = false
+  }
 
   useEffect(
     () => () => {
       if (burstTimer.current !== null) clearTimeout(burstTimer.current)
+      stopFriend()
     },
     [],
   )
+
+  // 말풍선이 바뀔 때마다 저장. 다 비면(방을 나가면) 지운다.
+  useEffect(() => {
+    saveVentChat(messages.length > 0 ? { openedAt, messages } : null)
+  }, [messages, openedAt])
+
+  // 친구가 쌓인 내 말을 한꺼번에 읽는다(1이 사라짐). 리액션을 마음먹었으면 조금 있다 답한다.
+  // ref와 setState만 쓰므로 한 번 만들어 두고 계속 쓴다.
+  const readAll = useCallback(() => {
+    readTimer.current = null
+    setMessages((m) => m.map(markRead))
+    if (!wantsReply.current) return
+    wantsReply.current = false
+    replyTimers.current.push(
+      window.setTimeout(() => {
+        const r = pickReply(lastReply.current)
+        lastReply.current = r
+        // 답하기 전에 그 사이 새로 보낸 말까지 다 읽는다 — 1이 남은 채로 답이 오지 않게
+        setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text: REPLIES[r], at: Date.now() }])
+      }, between(REPLY_AFTER_READ_MS)),
+    )
+  }, [])
+
+  // 새로고침 전에 친구가 안 읽은 말이 있었으면 이어서 읽는다(처음 열 때 한 번)
+  useEffect(() => {
+    if (saved?.messages.some((m) => m.from === 'me' && !m.read)) {
+      readTimer.current = window.setTimeout(readAll, between(READ_MS))
+    }
+  }, [saved, readAll])
 
   // 새 말풍선이 생기면 맨 아래로
   useEffect(() => {
@@ -155,18 +235,13 @@ export function Vent({ onBack }: Props) {
   function send() {
     const text = draft.trim()
     if (!text || phase !== 'chatting') return
-    const now = Date.now()
-    const sent: Message[] = [{ id: nextId.current++, from: 'me', text, at: now }]
-    if (Math.random() < REPLY_CHANCE) {
-      // 같은 리액션이 연달아 나오지 않게
-      let r = Math.floor(Math.random() * REPLIES.length)
-      if (r === lastReply.current) r = (r + 1) % REPLIES.length
-      lastReply.current = r
-      sent.push({ id: nextId.current++, from: 'friend', text: REPLIES[r], at: now })
-    }
-    setMessages((m) => [...m, ...sent])
+    setMessages((m) => [...m, { id: nextId.current++, from: 'me', text, at: Date.now(), read: false }])
     setDraft('')
     inputRef.current?.focus()
+
+    if (rollReply()) wantsReply.current = true
+    // 친구가 아직 안 읽었으면 그 읽기 타이머에 같이 묶인다
+    if (readTimer.current === null) readTimer.current = window.setTimeout(readAll, between(READ_MS))
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -186,6 +261,7 @@ export function Vent({ onBack }: Props) {
 
   function burst() {
     if (phase !== 'chatting') return
+    stopFriend()
     ;(document.activeElement as HTMLElement | null)?.blur()
     navigator.vibrate?.([30, 30, 60])
     setPhase('bursting')
@@ -229,7 +305,13 @@ export function Vent({ onBack }: Props) {
           <button className="text-button" onClick={onBack}>
             돌아가기
           </button>
-          <button className="cta" onClick={() => setPhase('chatting')}>
+          <button
+            className="cta"
+            onClick={() => {
+              setOpenedAt(Date.now())
+              setPhase('chatting')
+            }}
+          >
             새 방 열기
           </button>
         </footer>
@@ -313,7 +395,10 @@ export function Vent({ onBack }: Props) {
                 {showFriend && <span className="msg-name">{friend.name}</span>}
                 <div className="msg-line">
                   <p className="bubble">{m.text}</p>
-                  <span className="msg-time">{timeLabel(m.at)}</span>
+                  <span className="msg-meta">
+                    {m.from === 'me' && !m.read && <span className="msg-unread">1</span>}
+                    <span className="msg-time">{timeLabel(m.at)}</span>
+                  </span>
                 </div>
               </div>
             </div>
