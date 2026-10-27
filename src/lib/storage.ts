@@ -59,3 +59,21 @@ const BURST_COUNT_KEY = 'bium:burst-count'
 /** 하소연하기에서 터트린 방 수. 대화 내용은 저장하지 않는다. */
 export const loadBurstCount = () => read<number>(BURST_COUNT_KEY, 0)
 export const saveBurstCount = (n: number) => write(BURST_COUNT_KEY, n)
+
+const FRIEND_KEY = 'bium:vent-friend'
+
+/** 하소연하기의 친구 프로필. photo는 작게 줄인 data URL(없으면 기본 그림). */
+export interface Friend {
+  name: string
+  photo: string | null
+}
+export const DEFAULT_FRIEND: Friend = { name: '비움이', photo: null }
+
+export function loadFriend(): Friend {
+  const raw = read<Partial<Friend> | null>(FRIEND_KEY, null)
+  return {
+    name: typeof raw?.name === 'string' && raw.name.trim() ? raw.name : DEFAULT_FRIEND.name,
+    photo: typeof raw?.photo === 'string' && raw.photo.startsWith('data:image/') ? raw.photo : null,
+  }
+}
+export const saveFriend = (f: Friend) => write(FRIEND_KEY, f)
