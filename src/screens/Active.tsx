@@ -4,6 +4,7 @@ import { visibleCategories, type Category } from '../lib/categories'
 import { useTwoStep } from '../lib/useTwoStep'
 import { BackButton } from '../components/BackButton'
 import { Bin } from '../components/Bin'
+import { buzz } from '../lib/haptics'
 
 interface Props {
   bium: Bium
@@ -25,7 +26,7 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
 
   function handleToss(categoryId: string) {
     onToss(categoryId)
-    navigator.vibrate?.(12) // 안드로이드만. iOS 사파리는 미지원이라 무시된다
+    buzz(12)
   }
 
   return (

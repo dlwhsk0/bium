@@ -1,6 +1,6 @@
 import { periodLabel, summarize, type Bium } from '../lib/bium'
 import { categoryOf, labelOf, type Category } from '../lib/categories'
-import { getPack, iconUrl } from '../lib/packs'
+import { coverUrl } from '../lib/packs'
 import { formatDayKey } from '../lib/date'
 import { useTwoStep } from '../lib/useTwoStep'
 
@@ -37,7 +37,7 @@ export function Result({ bium, categories, onClose, onDelete }: Props) {
           <section className="card tiles">
             {shown.map((c) => (
               <div key={c.id} className="tile">
-                <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+                <img src={coverUrl(c.pack)} alt="" draggable={false} />
                 <span className="tile-label">{labelOf(c)}</span>
                 <span className="tile-count">{s.byCategory[c.id] ?? 0}개</span>
               </div>
