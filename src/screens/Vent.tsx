@@ -31,10 +31,24 @@ const QUIET_MESSAGES = 4
 // 보낸 말의 1은 보통 친구가 답하기로 했을 때만 사라진다. 답하기로 하면 이 사이 랜덤한 때에
 // 읽고(쌓인 1이 한꺼번에 사라짐) 곧바로 답한다. 가끔은 읽기만 한다(읽씹).
 const IGNORE_CHANCE = 0.1
-// 내 말에 '읽씹'이 들어가면 무조건 빨리 읽고 아니라고 해명한다
-const IGNORE_WORD = '읽씹'
+// 내 말에 이런 말이 들어가면(띄어쓰기 무시) 무조건 빨리 읽고 아니라고 해명한다
+const NUDGE_WORDS = ['읽씹', '왜안읽어', '빨리읽어']
+const isNudge = (text: string) => {
+  const compact = text.replace(/\s+/g, '')
+  return NUDGE_WORDS.some((w) => compact.includes(w))
+}
 const DENY_READ_MS: [number, number] = [300, 900]
-const DENIALS = ['아니 읽씹 아님 ㅋㅋ', '읽씹 아니야 듣고 있었어', '헐 아냐 다 읽고 있었어 계속 말해', '읽씹은 무슨 ㅋㅋ 니 말 다 듣는 중', '아 미안 읽씹 아님 ㅠ 계속해']
+// 안정형 말투로 차분하게. 문구 안의 줄바꿈(\n)은 다음 말풍선으로 나눠 보낸다.
+const DENIALS = [
+  '읽씹 아니야 읽고 있었어.',
+  '읽씹 아니야 읽고 있었어.\n천천히 다 말해',
+  'ㄴㄴ 읽씹 아냐 계속해',
+  'ㄴㄴ 미친놈들이네 걔네',
+  'ㄴㄴ 미친놈들이네 걔네\n그래서 어떻게 됐어?',
+  '아니 읽씹 아님',
+]
+// 2차 말풍선은 1차 뒤 이 사이에 이어서 온다
+const NEXT_BUBBLE_MS: [number, number] = [400, 700]
 const READ_MS: [number, number] = [400, 2000]
 const REPLY_AFTER_READ_MS: [number, number] = [300, 800]
 const between = ([min, max]: [number, number]) => min + Math.random() * (max - min)
@@ -51,15 +65,19 @@ function pickReply(last: number) {
   return r === last ? (r + 1) % REPLIES.length : r
 }
 // 찐친 리액션: 무조건 내 편, 같이 욕해준다. 진짜 톡처럼 짧은 것도 섞는다.
+// 줄바꿈(\n)이 있으면 다음 말풍선으로 한마디 더 — 한마디만 하면 정 없으니까.
 const REPLIES = [
   'ㅇㅇ',
   ';;',
   'ㅁㅊ?',
+  'ㅁㅊ?\n걔 제정신이야?',
   '아 에바',
   'ㄹㅇ',
   'ㅋㅋㅋㅋㅋ',
   '헐',
+  '헐\n그래서 어떻게 됐는데',
   'ㅠㅠ',
+  'ㅠㅠ\n오늘 진짜 고생했다',
   'ㄷㄷ',
   '개에바',
   '???',
@@ -72,12 +90,14 @@ const REPLIES = [
   'ㅅㅂ 듣는 내가 다 빡치네',
   '걔가 이상한 거야 100%',
   '니가 맞아 무조건',
+  '니가 맞아 무조건\n흔들리지 마',
   '개념 어디다 팔아먹었대',
   '와 진짜 개빡친다',
   '미친놈 아니야 그거?',
-  '내가 가서 한 대 쳐줘?',
+  '내가 가서 한 대 쳐줘?\n진심임',
   'ㄹㅇ 개어이없네',
   '넌 잘못 1도 없어',
+  '넌 잘못 1도 없어\n자책하지 마 진짜로',
   '그 사람 인생 왜 그렇게 산대',
   '와 개소리를 하고 있네',
   '아니 그걸 왜 너한테 그래?',
@@ -89,7 +109,7 @@ const REPLIES = [
   '그딴 말 신경 쓰지 마 걔가 쓰레기야',
   '와 나였으면 진짜 뒤집었다',
   '더 해 더 해 다 들어줄게',
-  '이건 니가 화날 만했어',
+  '이건 니가 화날 만했어\n화내도 돼',
 ]
 
 const timeLabel = (t: number) => {
@@ -247,8 +267,19 @@ export function Vent({ onBack }: Props) {
           lastReply.current = r
           text = REPLIES[r]
         }
+        // 줄바꿈마다 말풍선을 나눠, 첫 말풍선은 바로 나머지는 조금씩 이어서 보낸다
+        const [first, ...rest] = text.split('\n').filter((line) => line.trim())
         // 답하기 전에 그 사이 새로 보낸 말까지 다 읽는다 — 1이 남은 채로 답이 오지 않게
-        setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text, at: Date.now() }])
+        setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text: first, at: Date.now() }])
+        let delay = 0
+        for (const line of rest) {
+          delay += between(NEXT_BUBBLE_MS)
+          replyTimers.current.push(
+            window.setTimeout(() => {
+              setMessages((m) => [...m.map(markRead), { id: nextId.current++, from: 'friend', text: line, at: Date.now() }])
+            }, delay),
+          )
+        }
       }, between(REPLY_AFTER_READ_MS)),
     )
   }, [])
@@ -267,8 +298,8 @@ export function Vent({ onBack }: Props) {
 
     sinceReply.current++
 
-    // '읽씹'이라고 하면 무조건 빨리 읽고 아니라고 한다(조용히 들어주는 중이어도)
-    if (text.includes(IGNORE_WORD)) {
+    // '읽씹', '왜 안 읽어', '빨리 읽어'면 무조건 빨리 읽고 아니라고 한다(조용히 들어주는 중이어도)
+    if (isNudge(text)) {
       wantsReply.current = true
       replyText.current = pickDenial()
       sinceReply.current = 0

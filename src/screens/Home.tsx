@@ -19,51 +19,53 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport, onI
 
   return (
     <main className="screen home">
-      <div className="intro">
-        <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
-        <h1 className="title">비움</h1>
-        <p className="body">
-          버릴 물건을 하나씩 넣으면
-          <br />
-          며칠이 걸려도 대신 세어둘게요
-        </p>
-      </div>
-
-      <section className="history">
-        <h2 className="caption">마음도 비워요</h2>
-        <div className="card list">
-          <button className="mind-entry" onClick={onMind}>
-            <img src="/icons/memo.png" alt="" draggable={false} />
-            <span className="mind-entry-text">
-              <span className="mind-entry-title">마음 비우기</span>
-              <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
-            </span>
-          </button>
-          <button className="mind-entry" onClick={onVent}>
-            <img src="/icons/speech.png" alt="" draggable={false} />
-            <span className="mind-entry-text">
-              <span className="mind-entry-title">하소연하기</span>
-              <span className="mind-entry-sub">친구한테 털어놓고 방을 터트려요</span>
-            </span>
-          </button>
+      <div className="scroll-area">
+        <div className="intro">
+          <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
+          <h1 className="title">비움</h1>
+          <p className="body">
+            버릴 물건을 하나씩 넣으면
+            <br />
+            며칠이 걸려도 대신 세어둘게요
+          </p>
         </div>
-      </section>
 
-      {history.length > 0 && (
         <section className="history">
-          <h2 className="caption">지난 비움</h2>
-          <ul className="card list">
-            {history.map((b) => (
-              <li key={b.id}>
-                <button className="list-row" onClick={() => onOpen(b.id)}>
-                  <span className="list-title">{b.tosses.length}개 비움</span>
-                  <span className="list-sub">{periodLabel(b)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <h2 className="caption">마음도 비워요</h2>
+          <div className="card list">
+            <button className="mind-entry" onClick={onMind}>
+              <img src="/icons/memo.png" alt="" draggable={false} />
+              <span className="mind-entry-text">
+                <span className="mind-entry-title">마음 비우기</span>
+                <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
+              </span>
+            </button>
+            <button className="mind-entry" onClick={onVent}>
+              <img src="/icons/speech.png" alt="" draggable={false} />
+              <span className="mind-entry-text">
+                <span className="mind-entry-title">하소연하기</span>
+                <span className="mind-entry-sub">친구한테 털어놓고 방을 터트려요</span>
+              </span>
+            </button>
+          </div>
         </section>
-      )}
+
+        {history.length > 0 && (
+          <section className="history">
+            <h2 className="caption">지난 비움</h2>
+            <ul className="card list">
+              {history.map((b) => (
+                <li key={b.id}>
+                  <button className="list-row" onClick={() => onOpen(b.id)}>
+                    <span className="list-title">{b.tosses.length}개 비움</span>
+                    <span className="list-sub">{periodLabel(b)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
 
       <footer className="actions">
         {notice && (

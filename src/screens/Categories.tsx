@@ -57,68 +57,70 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
 
   return (
     <main className="screen categories">
-      <header className="summary">
-        <h1 className="title">카테고리 편집</h1>
-        <p className="body">
-          버릴 물건을 나눌 칸이에요.
-          <br />
-          {MIN_CATEGORIES}개부터 {MAX_CATEGORIES}개까지 둘 수 있어요.
-        </p>
-      </header>
+      <div className="scroll-area">
+        <header className="summary">
+          <h1 className="title">카테고리 편집</h1>
+          <p className="body">
+            버릴 물건을 나눌 칸이에요.
+            <br />
+            {MIN_CATEGORIES}개부터 {MAX_CATEGORIES}개까지 둘 수 있어요.
+          </p>
+        </header>
 
-      <ul className="card edit-list">
-        {visible.map((c) => (
-          <li key={c.id} className="edit-item">
-            <div className="edit-row">
-              <button
-                className={picking === c.id ? 'pack-thumb open' : 'pack-thumb'}
-                onClick={() => setPicking(picking === c.id ? null : c.id)}
-                aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
-                aria-expanded={picking === c.id}
-              >
-                <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
-              </button>
-              <input
-                className="label-input"
-                value={c.label}
-                maxLength={MAX_LABEL}
-                placeholder={getPack(c.pack).name}
-                aria-label="카테고리 이름"
-                onChange={(e) => onChange(updateCategory(categories, c.id, { label: e.target.value }))}
-                onBlur={(e) => {
-                  if (!e.target.value.trim()) onChange(updateCategory(categories, c.id, { label: getPack(c.pack).name }))
-                }}
-              />
-              <DeleteButton disabled={visible.length <= MIN_CATEGORIES} onDelete={() => onChange(hideCategory(categories, c.id))} />
-            </div>
-
-            {picking === c.id && (
-              <div className="pack-grid" role="radiogroup" aria-label="아이템팩">
-                {PACKS.map((p) => (
-                  <button
-                    key={p.key}
-                    role="radio"
-                    aria-checked={p.key === c.pack}
-                    className={p.key === c.pack ? 'pack-option selected' : 'pack-option'}
-                    onClick={() => choosePack(c, p.key)}
-                  >
-                    <span className="pack-icons">
-                      {p.icons.slice(0, 3).map((slug) => (
-                        <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
-                      ))}
-                    </span>
-                    <span className="pack-name">{p.name}</span>
-                  </button>
-                ))}
+        <ul className="card edit-list">
+          {visible.map((c) => (
+            <li key={c.id} className="edit-item">
+              <div className="edit-row">
+                <button
+                  className={picking === c.id ? 'pack-thumb open' : 'pack-thumb'}
+                  onClick={() => setPicking(picking === c.id ? null : c.id)}
+                  aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
+                  aria-expanded={picking === c.id}
+                >
+                  <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+                </button>
+                <input
+                  className="label-input"
+                  value={c.label}
+                  maxLength={MAX_LABEL}
+                  placeholder={getPack(c.pack).name}
+                  aria-label="카테고리 이름"
+                  onChange={(e) => onChange(updateCategory(categories, c.id, { label: e.target.value }))}
+                  onBlur={(e) => {
+                    if (!e.target.value.trim()) onChange(updateCategory(categories, c.id, { label: getPack(c.pack).name }))
+                  }}
+                />
+                <DeleteButton disabled={visible.length <= MIN_CATEGORIES} onDelete={() => onChange(hideCategory(categories, c.id))} />
               </div>
-            )}
-          </li>
-        ))}
-      </ul>
 
-      <button className="text-button" onClick={add} disabled={visible.length >= MAX_CATEGORIES}>
-        {visible.length >= MAX_CATEGORIES ? `카테고리는 ${MAX_CATEGORIES}개까지예요` : '카테고리 추가'}
-      </button>
+              {picking === c.id && (
+                <div className="pack-grid" role="radiogroup" aria-label="아이템팩">
+                  {PACKS.map((p) => (
+                    <button
+                      key={p.key}
+                      role="radio"
+                      aria-checked={p.key === c.pack}
+                      className={p.key === c.pack ? 'pack-option selected' : 'pack-option'}
+                      onClick={() => choosePack(c, p.key)}
+                    >
+                      <span className="pack-icons">
+                        {p.icons.slice(0, 3).map((slug) => (
+                          <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
+                        ))}
+                      </span>
+                      <span className="pack-name">{p.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <button className="text-button" onClick={add} disabled={visible.length >= MAX_CATEGORIES}>
+          {visible.length >= MAX_CATEGORIES ? `카테고리는 ${MAX_CATEGORIES}개까지예요` : '카테고리 추가'}
+        </button>
+      </div>
 
       <footer className="actions">
         <button className="cta" onClick={onDone}>

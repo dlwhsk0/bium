@@ -22,35 +22,37 @@ export function Result({ bium, categories, onClose, onDelete }: Props) {
 
   return (
     <main className="screen result">
-      <header className="summary">
-        <img className="intro-icon" src="/icons/party.png" alt="" draggable={false} />
-        <p className="caption">{periodLabel(bium)}</p>
-        <p className="big-number">
-          {s.total}
-          <span className="unit">개 비웠어요</span>
-        </p>
-        <p className="body">{s.days}일 동안 방에서 내보냈어요</p>
-      </header>
+      <div className="scroll-area">
+        <header className="summary">
+          <img className="intro-icon" src="/icons/party.png" alt="" draggable={false} />
+          <p className="caption">{periodLabel(bium)}</p>
+          <p className="big-number">
+            {s.total}
+            <span className="unit">개 비웠어요</span>
+          </p>
+          <p className="body">{s.days}일 동안 방에서 내보냈어요</p>
+        </header>
 
-      {shown.length > 0 && (
-        <section className="card tiles">
-          {shown.map((c) => (
-            <div key={c.id} className="tile">
-              <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
-              <span className="tile-label">{labelOf(c)}</span>
-              <span className="tile-count">{s.byCategory[c.id] ?? 0}개</span>
-            </div>
-          ))}
-        </section>
-      )}
+        {shown.length > 0 && (
+          <section className="card tiles">
+            {shown.map((c) => (
+              <div key={c.id} className="tile">
+                <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+                <span className="tile-label">{labelOf(c)}</span>
+                <span className="tile-count">{s.byCategory[c.id] ?? 0}개</span>
+              </div>
+            ))}
+          </section>
+        )}
 
-      {s.bestDay && (
-        <section className="card best">
-          <span className="caption">가장 많이 치운 날</span>
-          <span className="best-day">{formatDayKey(s.bestDay.day)}</span>
-          <span className="body">이날 {s.bestDay.count}개를 비웠어요</span>
-        </section>
-      )}
+        {s.bestDay && (
+          <section className="card best">
+            <span className="caption">가장 많이 치운 날</span>
+            <span className="best-day">{formatDayKey(s.bestDay.day)}</span>
+            <span className="body">이날 {s.bestDay.count}개를 비웠어요</span>
+          </section>
+        )}
+      </div>
 
       <footer className="actions">
         <button

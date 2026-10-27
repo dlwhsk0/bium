@@ -111,13 +111,35 @@ img {
 /* ── 공통 ── */
 .screen {
   max-width: 480px;
-  min-height: 100dvh;
+  /* 화면은 항상 창 높이에 딱 맞춘다. 넘치는 내용은 .scroll-area 안에서만 스크롤 */
+  height: 100dvh;
+  overflow: hidden;
   margin: 0 auto;
   padding: max(28px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 24px;
   text-align: center;
+}
+
+.scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* 스크롤바와 포커스 테두리가 잘리지 않게 화면 여백까지 넓혔다가 안쪽 여백으로 되돌린다 */
+  margin: 0 -20px;
+  padding: 4px 20px;
+}
+
+.scroll-area > * {
+  flex-shrink: 0;
+}
+
+.scroll-area > .intro {
+  flex-grow: 1;
 }
 
 .caption {
@@ -282,7 +304,8 @@ img {
   display: grid;
   /* 4칸 격자에 카드가 2칸씩: 홀수 개일 때 마지막 카드를 가운데(2~3칸)에 놓기 위해 */
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: minmax(180px, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
   gap: 12px;
 }
 
@@ -311,13 +334,21 @@ img {
 
 .bin-head {
   position: absolute;
-  top: 18px;
-  left: 0;
-  right: 0;
+  top: 14px;
+  left: 50%;
+  z-index: 2; /* 더미가 높이 쌓여도 제목은 위에 보이게 */
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: baseline;
   gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--card);
+  white-space: nowrap;
+}
+
+.bin:active .bin-head {
+  background: var(--card-pressed);
 }
 
 .bin-label {
@@ -610,7 +641,7 @@ img {
 
 .paper-area {
   flex: 1;
-  min-height: 300px;
+  min-height: 140px;
   display: flex;
 }
 
@@ -1375,7 +1406,8 @@ img.is-photo {
 
 .ob-visual {
   flex: 1;
-  min-height: 300px;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1493,6 +1525,41 @@ img.is-photo {
   50% {
     transform: scale(1.15) rotate(12deg);
     opacity: 0.75;
+  }
+}
+
+/* 키가 작은 화면(iPhone SE 등): 그림과 큰 숫자를 줄여 한 화면에 들어오게 */
+@media (max-height: 720px) {
+  .screen {
+    gap: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+
+  .intro-icon {
+    width: 88px;
+    height: 88px;
+  }
+
+  .result .intro-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .big-number {
+    font-size: 52px;
+  }
+
+  .mind-bin {
+    width: 72px;
+    height: 72px;
+  }
+
+  .ob-stage {
+    transform: scale(0.78);
+  }
+
+  .ob-title {
+    font-size: 22px;
   }
 }
 
