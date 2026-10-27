@@ -47,3 +47,9 @@ export function loadCategories(): Category[] {
   return visibleCategories(ok).length >= MIN_CATEGORIES ? ok : DEFAULT_CATEGORIES
 }
 export const saveCategories = (list: Category[]) => write(CATEGORIES_KEY, list)
+
+const MIND_COUNT_KEY = 'bium:mind-count'
+
+/** 마음 비우기로 버린 종이 수. 적은 내용은 어디에도 저장하지 않고 개수만 센다. */
+export const loadMindCount = () => read<number>(MIND_COUNT_KEY, 0)
+export const saveMindCount = (n: number) => write(MIND_COUNT_KEY, n)

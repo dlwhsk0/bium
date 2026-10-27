@@ -12,9 +12,10 @@ interface Props {
   onFinish: () => void
   /** 카드를 꾹 누르면 그 카테고리를 편집 */
   onEditCategory: (id: string) => void
+  onMind: () => void
 }
 
-export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCategory }: Props) {
+export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCategory, onMind }: Props) {
   // 실수로 끝내지 않게 두 번 눌러야 끝난다
   const finishButton = useTwoStep(onFinish)
   // 화면을 연 뒤에 넣은 것만 떨어지게 한다. 이미 쌓여 있던 건 그대로 둔다.
@@ -49,9 +50,14 @@ export function Active({ bium, categories, onToss, onUndo, onFinish, onEditCateg
       </section>
 
       <footer className="actions">
-        <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
-          방금 넣은 것 되돌리기
-        </button>
+        <div className="text-buttons">
+          <button className="text-button" onClick={onUndo} disabled={bium.tosses.length === 0}>
+            방금 넣은 것 되돌리기
+          </button>
+          <button className="text-button" onClick={onMind}>
+            마음 비우기
+          </button>
+        </div>
         <button
           className={finishButton.confirming ? 'cta confirming' : 'cta'}
           onClick={finishButton.press}
