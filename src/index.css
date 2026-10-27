@@ -816,26 +816,134 @@ img {
 }
 
 .chat-title {
-  text-align: center;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 44px;
   font-size: 17px;
   font-weight: 700;
 }
 
-.chat-burst {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 36px;
-  padding: 0 12px 0 8px;
-  border-radius: 18px;
+.chat-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-title-photo {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  border-radius: 11px;
   background: var(--chat-friend);
-  font-size: 14px;
+}
+
+/* 사용자가 고른 사진은 꽉 채운다(기본 그림은 여백을 둔다). 개별 아바타 규칙보다 이기도록 img까지 붙인다. */
+img.is-photo {
+  padding: 0;
+  object-fit: cover;
+}
+
+.chat-date {
+  align-self: center;
+  margin: 4px 0 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--chat-meta);
+  font-size: 12px;
+}
+
+.msg-avatar-button {
+  flex-shrink: 0;
+}
+
+.chat-menu-button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text-1);
+}
+
+/* 오른쪽에서 열리는 서랍 */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.35);
+  animation: fade-in 0.2s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(300px, 78%);
+  display: flex;
+  flex-direction: column;
+  padding: max(24px, env(safe-area-inset-top)) 20px 20px;
+  background: var(--card);
+  animation: slide-in 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+.drawer-friend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-photo {
+  width: 72px;
+  height: 72px;
+  padding: 10px;
+  border-radius: 26px;
+  background: var(--bg);
+}
+
+.drawer-name {
+  font-size: 17px;
   font-weight: 700;
 }
 
-.chat-burst img {
-  width: 22px;
-  height: 22px;
+.drawer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.drawer-item.danger {
+  color: var(--danger);
+}
+
+.drawer-hint {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .chat-list {
@@ -851,14 +959,6 @@ img {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  animation: msg-in 0.2s ease-out both;
-}
-
-@keyframes msg-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.96);
-  }
 }
 
 .msg.me {
@@ -929,35 +1029,6 @@ img.msg-avatar {
   font-size: 11px;
 }
 
-.bubble.typing {
-  display: flex;
-  gap: 4px;
-  padding: 14px 14px;
-}
-
-.bubble.typing span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-3);
-  animation: dot 1s ease-in-out infinite;
-}
-
-.bubble.typing span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.bubble.typing span:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes dot {
-  30% {
-    transform: translateY(-4px);
-    opacity: 0.5;
-  }
-}
-
 .chat-input {
   display: flex;
   align-items: flex-end;
@@ -1000,6 +1071,39 @@ img.msg-avatar {
   opacity: 1;
   background: var(--bg);
   color: var(--text-3);
+}
+
+/* 친구 프로필 */
+.profile-edit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 44px;
+  background: var(--card);
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+}
+
+.profile-photo img.is-photo {
+  padding: 0;
+}
+
+.profile-name {
+  max-width: 260px;
+  margin-top: 8px;
 }
 
 /* 방 터트리기: 화면이 흔들리고 말풍선이 사방으로 튕겨 나간다 */
@@ -1251,7 +1355,9 @@ img.msg-avatar {
   .ob-sparkle,
   .mind-bin.wobble,
   .chat.shaking,
-  .burst-flash {
+  .burst-flash,
+  .drawer,
+  .drawer-backdrop {
     animation: none;
   }
 
