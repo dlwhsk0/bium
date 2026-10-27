@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: '비움',
         short_name: '비움',
-        description: '방 청소하며 버리는 물건을 하나씩 넣어 세어두는 앱',
+        description: '방도 마음도 비우는 작은 앱 모음: 물건 세기, 하소연, 쪽지 버리기',
         theme_color: '#f2f4f6',
         background_color: '#f2f4f6',
         display: 'standalone',

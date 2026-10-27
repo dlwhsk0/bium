@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { BackButton } from '../components/BackButton'
 import { Sheet } from '../components/Sheet'
 import { periodLabel, type Bium } from '../lib/bium'
 
@@ -11,8 +12,8 @@ interface Props {
   onImport: (file: File) => void
   onIntro: () => void
   onEditCategories: () => void
-  onMind: () => void
-  onVent: () => void
+  /** 휴대폰 홈 화면으로 */
+  onExit: () => void
 }
 
 /** 홈에 바로 보이는 지난 비움 수. 나머지는 "모두 보기" 시트에서 — 홈이 한 화면을 넘지 않게. */
@@ -30,13 +31,14 @@ function HistoryRow({ b, onOpen }: { b: Bium; onOpen: (id: string) => void }) {
 }
 
 export function Home(props: Props) {
-  const { history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind, onVent } = props
+  const { history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onExit } = props
   const fileInput = useRef<HTMLInputElement>(null)
   const [sheet, setSheet] = useState<'settings' | 'history' | null>(null)
   const close = () => setSheet(null)
 
   return (
     <main className="screen home">
+      <BackButton onClick={onExit} />
       <button className="corner-button" onClick={() => setSheet('settings')} aria-label="설정">
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>
           <path
@@ -50,7 +52,7 @@ export function Home(props: Props) {
       </button>
 
       <div className="intro">
-        <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
+        <img className="intro-icon" src="/icons/package-lg.png" alt="" draggable={false} />
         <h1 className="title">비움</h1>
         <p className="body">
           버릴 물건을 하나씩 넣으면
@@ -58,19 +60,6 @@ export function Home(props: Props) {
           며칠이 걸려도 대신 세어둘게요
         </p>
       </div>
-
-      <section className="mind-tiles" aria-label="마음도 비워요">
-        <button className="card mind-tile" onClick={onMind}>
-          <img src="/icons/memo.png" alt="" draggable={false} />
-          <span className="mind-tile-title">마음 비우기</span>
-          <span className="mind-tile-sub">적어서 구겨 버려요</span>
-        </button>
-        <button className="card mind-tile" onClick={onVent}>
-          <img src="/icons/speech.png" alt="" draggable={false} />
-          <span className="mind-tile-title">하소연하기</span>
-          <span className="mind-tile-sub">털어놓고 방을 터트려요</span>
-        </button>
-      </section>
 
       {history.length > 0 && (
         <section className="history">
