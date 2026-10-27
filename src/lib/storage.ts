@@ -56,13 +56,13 @@ export const saveMindCount = (n: number) => write(MIND_COUNT_KEY, n)
 
 const BURST_COUNT_KEY = 'bium:burst-count'
 
-/** 대나무숲에서 터트린 방 수. 대화 내용은 저장하지 않는다. */
+/** Chat에서 터트린 방 수. 대화 내용은 저장하지 않는다. */
 export const loadBurstCount = () => read<number>(BURST_COUNT_KEY, 0)
 export const saveBurstCount = (n: number) => write(BURST_COUNT_KEY, n)
 
 const FRIEND_KEY = 'bium:vent-friend'
 
-/** 대나무숲의 친구 프로필. photo는 작게 줄인 data URL(없으면 기본 그림). */
+/** Chat의 친구 프로필. photo는 작게 줄인 data URL(없으면 기본 그림). */
 export interface Friend {
   name: string
   photo: string | null
@@ -80,7 +80,7 @@ export const saveFriend = (f: Friend) => write(FRIEND_KEY, f)
 
 const VENT_CHAT_KEY = 'bium:vent-chat'
 
-/** 대나무숲 톡방 말풍선. read는 내 말풍선만(친구가 읽었는지). */
+/** Chat 톡방 말풍선. read는 내 말풍선만(친구가 읽었는지). */
 export interface VentMessage {
   id: number
   from: 'me' | 'friend'
