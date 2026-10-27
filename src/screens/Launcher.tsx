@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import type { Platform } from '../lib/platform'
 import { BiumWidget } from '../components/BiumWidget'
+import { ClockWidget } from '../components/ClockWidget'
 import { Emoji } from '../components/Emoji'
 import { Sheet } from '../components/Sheet'
 import { useLongPress } from '../lib/useLongPress'
@@ -58,12 +59,13 @@ function Choice({ label, sub, on, onPick }: { label: string; sub?: string; on: b
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** 휴대폰 홈 화면. 아이폰이면 둥근 사각 아이콘, 안드로이드면 동그란 아이콘. */
+/** 휴대폰 홈 화면. 아이폰이면 아이폰 위젯·아이콘, 안드로이드면 갤럭시(One UI) 시계·아이콘. */
 export function Launcher(props: Props) {
   const { onOpen, platform, wallpaper, clock24, showWidget, widgetSize, onChangeSettings, onOpenWallpaper } = props
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 15_000)
+    // 아이폰 시계 위젯의 초침이 돌도록 1초마다
+    const t = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
@@ -78,7 +80,6 @@ export function Launcher(props: Props) {
     saveActive(next)
     setActive(next)
   }
-  const date = `${now.getMonth() + 1}월 ${now.getDate()}일 ${'일월화수목금토'[now.getDay()]}요일`
   const hhmm = (d: Date, h24: boolean) =>
     h24 ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : `${d.getHours() < 12 ? '오전' : '오후'} ${d.getHours() % 12 || 12}:${pad(d.getMinutes())}`
 
@@ -98,24 +99,17 @@ export function Launcher(props: Props) {
       {...bgPress}
       onPointerDown={(e) => {
         // 아이콘·위젯 위에서 누른 건 빈 곳이 아니다
-        if (!(e.target as HTMLElement).closest('.app, .widget, .bium-widget, .sheet-backdrop')) bgPress.onPointerDown(e)
+        if (!(e.target as HTMLElement).closest('.app, .ios-widget, .galaxy-clock, .bium-widget, .sheet-backdrop')) bgPress.onPointerDown(e)
       }}
       onClick={undefined}
     >
-      <section className="widget" aria-label="오늘, 꾹 누르면 시간 형식" {...clockPress}>
-        <p className="widget-time">
-          {clock24 ? (
-            hhmm(now, true)
-          ) : (
-            <>
-              <span className="widget-ampm">{now.getHours() < 12 ? '오전' : '오후'}</span>
-              {now.getHours() % 12 || 12}:{pad(now.getMinutes())}
-            </>
-          )}
-        </p>
-        <p className="widget-date">{date}</p>
-        <p className="widget-note">{active ? `${active.tosses.length}개째 비우는 중` : '오늘 하나만 버려볼까요'}</p>
-      </section>
+      <ClockWidget
+        platform={platform}
+        now={now}
+        clock24={clock24}
+        note={active ? `${active.tosses.length}개째 비우는 중` : '오늘 하나만 버려볼까요'}
+        press={clockPress}
+      />
 
       <nav className="app-grid" aria-label="앱">
         {APPS.map((a) => (

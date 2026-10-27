@@ -658,48 +658,173 @@ img {
   background: #8a93a6;
 }
 
-.widget p {
+/* 아이폰 기본 위젯 두 개(시계, 캘린더): 흰 카드(다크는 검정), 정사각형 */
+.ios-widgets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.ios-widget {
+  aspect-ratio: 1;
+  max-height: 170px;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.dark .ios-widget {
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+.ios-widget p {
   margin: 0;
 }
 
-/* 아이폰: 흐린 유리 카드 위젯 */
-.launcher.ios .widget {
-  padding: 18px 20px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.22);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+.clock-face-widget {
+  display: grid;
+  place-items: center;
+  padding: 10px;
 }
 
-.widget-time {
-  font-size: 44px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.clock-face {
+  width: 100%;
+  height: 100%;
 }
 
-.widget-date {
-  font-size: 15px;
+.clock-dial {
+  fill: #ffffff;
+}
+
+.dark .clock-dial {
+  fill: #1c1c1e;
+}
+
+.clock-num {
+  font-size: 10px;
   font-weight: 600;
+  fill: currentColor;
 }
 
-.widget-note {
-  margin-top: 10px !important;
+.clock-city {
+  font-size: 7px;
+  font-weight: 700;
+  fill: #8e8e93;
+}
+
+.clock-digital {
+  font-size: 6.5px;
+  font-weight: 600;
+  fill: #8e8e93;
+}
+
+.clock-hand {
+  stroke-linecap: round;
+}
+
+.clock-hand.hour,
+.clock-hand.minute {
+  stroke: currentColor;
+}
+
+.clock-hand.hour {
+  stroke-width: 3.2;
+}
+
+.clock-hand.minute {
+  stroke-width: 2.2;
+}
+
+.clock-hand.second {
+  stroke: #ff9500;
+  stroke-width: 1;
+}
+
+.clock-pin {
+  fill: #ff9500;
+  stroke: currentColor;
+  stroke-width: 0.6;
+}
+
+.calendar-widget {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.cal-weekday {
+  color: #ff3b30;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cal-day {
+  font-size: 46px;
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.cal-event {
+  margin-top: auto !important;
+  padding-left: 7px;
+  border-left: 3px solid #34c759;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* 갤럭시(One UI) 홈 화면 시계: 카드 없이 배경 위에 큰 숫자 */
+.galaxy-clock {
+  padding: 18px 6px 4px;
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.galaxy-clock p {
+  margin: 0;
+}
+
+.galaxy-time {
+  font-size: 76px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.galaxy-ampm {
+  margin-right: 6px;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.galaxy-date {
+  margin-top: 8px !important;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.galaxy-note {
+  margin-top: 4px !important;
   font-size: 14px;
   font-weight: 500;
   opacity: 0.9;
 }
 
-/* 안드로이드: 카드 없이 큰 시계 */
-.launcher.android .widget {
-  padding: 8px 4px;
-  text-align: left;
+/* 기기 글꼴: 아이폰은 SF, 갤럭시는 기기 기본 글꼴(삼성 글꼴) — 없으면 Pretendard */
+.launcher.ios,
+.settings.ios {
+  font-family: -apple-system, 'SF Pro Text', 'Apple SD Gothic Neo', 'Pretendard Variable', sans-serif;
 }
 
-.launcher.android .widget-time {
-  font-size: 64px;
-  font-weight: 300;
+.launcher.android,
+.settings.android {
+  font-family: 'SamsungOneUI', 'Samsung Sans', 'SECRobotoLight', Roboto, 'Pretendard Variable', sans-serif;
 }
 
 .app-grid {
@@ -729,7 +854,7 @@ img {
 .launcher.android .app-icon {
   width: 58px;
   height: 58px;
-  border-radius: 50%;
+  border-radius: 20px; /* 갤럭시 One UI 기본 아이콘: 둥근 사각형 */
 }
 
 .app:active .app-icon {
@@ -772,9 +897,22 @@ img {
 }
 
 .launcher.ios .bium-widget {
-  background: rgba(255, 255, 255, 0.22);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.dark .launcher.ios .bium-widget {
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+.launcher.ios .bium-widget-cell {
+  background: #f2f2f7;
+}
+
+.dark .launcher.ios .bium-widget-cell {
+  background: #2c2c2e;
 }
 
 .launcher.android .bium-widget {
@@ -1726,11 +1864,45 @@ img.is-photo {
   }
 }
 
-/* ── 설정 앱: 실제 폰 설정처럼 목록. 아이폰/안드로이드 모양 따로 ── */
+/* ── 설정 앱: 실제 아이폰 설정 / 갤럭시 One UI 설정처럼 ── */
 .settings {
   gap: 0;
   padding: 0;
   text-align: left;
+}
+
+.settings.ios {
+  --set-bg: #f2f2f7;
+  --set-card: #ffffff;
+  --set-sep: #c6c6c8;
+  --set-sub: #8e8e93;
+  --set-accent: #007aff;
+}
+
+.dark .settings.ios {
+  --set-bg: #000000;
+  --set-card: #1c1c1e;
+  --set-sep: #38383a;
+}
+
+.settings.android {
+  --set-bg: #f2f2f2;
+  --set-card: #ffffff;
+  --set-sep: #e8e8e8;
+  --set-sub: #808080;
+  --set-accent: #387aff;
+}
+
+.dark .settings.android {
+  --set-bg: #000000;
+  --set-card: #171717;
+  --set-sep: #2b2b2b;
+  --set-sub: #9a9a9a;
+  --set-accent: #5c94ff;
+}
+
+.settings {
+  background: var(--set-bg);
 }
 
 .set-bar {
@@ -1739,7 +1911,7 @@ img.is-photo {
   display: flex;
   align-items: center;
   min-height: 52px;
-  padding: max(6px, env(safe-area-inset-top)) 8px 6px;
+  padding: max(6px, env(safe-area-inset-top)) 8px 0;
 }
 
 .set-back {
@@ -1748,51 +1920,77 @@ img.is-photo {
   gap: 2px;
   height: 44px;
   padding: 0 8px 0 4px;
-  color: var(--accent);
+  color: var(--set-accent);
   font-size: 17px;
+}
+
+.settings.android .set-back {
+  color: var(--text-1);
 }
 
 .set-bar-title {
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.settings.ios .set-bar-title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.settings.ios .set-bar.main .set-bar-title {
-  display: none; /* 메인은 큰 제목을 쓴다 */
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .set-large-title {
   margin: 0;
-  padding: 0 20px 8px;
-  font-size: 32px;
-  font-weight: 800;
+  padding: 0 20px 10px;
+  font-size: 34px;
+  font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* One UI: 위쪽을 넓게 비우고 큰 제목을 아래쪽에 — 한 손으로 닿는 곳에 내용이 오게 */
+.settings.android .set-large-title {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  height: 20dvh;
+  min-height: 92px;
+  padding: 0 24px 22px;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.settings.android.is-sub .set-large-title {
+  height: 14dvh;
+  min-height: 72px;
+  font-size: 28px;
 }
 
 .set-body {
   margin: 0;
   padding: 4px 16px max(24px, env(safe-area-inset-bottom));
-  gap: 22px;
+  gap: 26px;
+}
+
+.settings.android .set-body {
+  padding: 0 12px max(24px, env(safe-area-inset-bottom));
+  gap: 16px;
 }
 
 .set-group-title {
   margin: 0 0 6px;
   padding: 0 16px;
-  color: var(--text-3);
+  color: var(--set-sub);
   font-size: 13px;
   font-weight: 500;
+}
+
+.settings.android .set-group-title {
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .set-group-footer {
   margin: 6px 0 0;
   padding: 0 16px;
-  color: var(--text-3);
+  color: var(--set-sub);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -1800,51 +1998,137 @@ img.is-photo {
 .set-group-body {
   overflow: hidden;
   border-radius: 12px;
-  background: var(--card);
+  background: var(--set-card);
+}
+
+.settings.android .set-group-body {
+  padding: 4px 0;
+  border-radius: 26px;
 }
 
 .set-row {
+  position: relative;
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
+  gap: 12px;
+  padding: 8px 16px;
   color: var(--text-1);
   text-align: left;
 }
 
-.set-group-body > .set-row + .set-row {
-  border-top: 1px solid var(--line);
+/* 구분선: 아이콘이 있으면 아이콘 뒤부터 */
+.set-group-body > .set-row + .set-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 16px;
+  border-top: 0.5px solid var(--set-sep);
+}
+
+.set-group-body > .set-row + .set-row:has(.set-icon)::before {
+  left: 58px;
+}
+
+.settings.android .set-group-body > .set-row + .set-row::before {
+  left: 20px;
+  right: 20px;
+}
+
+.settings.android .set-group-body > .set-row + .set-row:has(.set-icon)::before {
+  left: 72px;
+}
+
+.set-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+}
+
+.settings.android .set-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
 
 .set-row-text {
   flex: 1;
   min-width: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
 .set-row-label {
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .set-row-value {
-  color: var(--text-3);
-  font-size: 15px;
+  color: var(--set-sub);
+  font-size: 17px;
+}
+
+.settings.android .set-row {
+  min-height: 62px;
+  gap: 16px;
+  padding: 10px 20px;
+}
+
+.settings.android .set-row-text {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.settings.android .set-row-label {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+/* One UI: 지금 값은 제목 아래 파란 글씨 */
+.settings.android .set-row-value {
+  color: var(--set-accent);
+  font-size: 14px;
 }
 
 .set-chevron {
   flex-shrink: 0;
-  color: var(--text-3);
-  opacity: 0.6;
+  color: var(--set-sub);
+  opacity: 0.7;
 }
 
 .set-check {
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--set-accent);
+}
+
+/* 갤럭시 고르기: 왼쪽 동그라미 선택 버튼 */
+.set-radio {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--set-sub);
+  border-radius: 50%;
+}
+
+.set-radio.on {
+  border-color: var(--set-accent);
+}
+
+.set-radio.on::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--set-accent);
 }
 
 /* 아이폰 스위치: 초록 */
@@ -1854,8 +2138,12 @@ img.is-photo {
   width: 51px;
   height: 31px;
   border-radius: 16px;
-  background: var(--line);
+  background: #e9e9ea;
   transition: background-color 0.2s;
+}
+
+.dark .set-switch {
+  background: #39393d;
 }
 
 .set-switch.on {
@@ -1878,103 +2166,28 @@ img.is-photo {
   transform: translateX(20px);
 }
 
-/* 안드로이드: 카드 없이 넓은 목록, 파란 섹션 제목, 값은 제목 아래 */
-.settings.android .set-bar {
-  gap: 8px;
-  padding-left: 4px;
-}
-
-.settings.android .set-bar-title {
-  font-size: 22px;
-  font-weight: 500;
-}
-
-.settings.android .set-back {
-  color: var(--text-1);
-}
-
-.settings.android .set-body {
-  padding: 0 0 24px;
-  gap: 8px;
-}
-
-.settings.android .set-group-title {
-  margin: 16px 0 4px;
-  padding: 0 20px;
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.settings.android .set-group-body {
-  border-radius: 0;
-  background: transparent;
-}
-
-.settings.android .set-group-body > .set-row + .set-row {
-  border-top: 0;
-}
-
-.settings.android .set-row {
-  min-height: 64px;
-  padding: 12px 20px;
-}
-
-.settings.android .set-row-text {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.settings.android .set-row-label {
-  font-size: 17px;
-}
-
-.settings.android .set-row-value {
-  font-size: 14px;
-}
-
-.settings.android .set-chevron {
-  display: none;
-}
-
-.settings.android .set-group-footer {
-  padding: 0 20px;
-}
-
-/* 안드로이드 스위치: 머티리얼 */
+/* 갤럭시 스위치: 파랑, 더 얇고 작은 손잡이 */
 .settings.android .set-switch {
-  width: 52px;
-  height: 32px;
-  border: 2px solid var(--text-3);
-  background: var(--card);
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  background: #c4c4c4;
 }
 
-.settings.android .set-switch-knob {
-  top: 6px;
-  left: 6px;
-  width: 16px;
-  height: 16px;
-  background: var(--text-3);
-  box-shadow: none;
-  transition:
-    transform 0.2s,
-    width 0.2s,
-    height 0.2s;
+.dark .settings.android .set-switch {
+  background: #4a4a4a;
 }
 
 .settings.android .set-switch.on {
-  border-color: var(--accent);
-  background: var(--accent);
+  background: var(--set-accent);
 }
 
-.settings.android .set-switch.on .set-switch-knob {
-  top: 2px;
-  left: 2px;
-  width: 24px;
-  height: 24px;
-  background: #ffffff;
-  transform: translateX(20px);
+.settings.android .set-switch-knob {
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  box-shadow: none;
 }
 
 /* 배경화면 고르기 */
@@ -2097,13 +2310,6 @@ img.is-photo {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-/* 시계 12시간제의 오전/오후 */
-.widget-ampm {
-  margin-right: 6px;
-  font-size: 0.5em;
-  font-weight: 600;
 }
 
 /* ── 처음 소개 ── */
@@ -2357,6 +2563,12 @@ img.is-photo {
     padding-bottom: 2px;
   }
 
+  .settings.android .set-large-title {
+    height: 13dvh;
+    min-height: 64px;
+    padding-bottom: 14px;
+  }
+
   .set-body {
     gap: 14px;
   }
@@ -2364,10 +2576,6 @@ img.is-photo {
   .settings.android .set-row {
     min-height: 54px;
     padding: 8px 20px;
-  }
-
-  .settings.android .set-group-title {
-    margin-top: 8px;
   }
 
   .wall-grid {
