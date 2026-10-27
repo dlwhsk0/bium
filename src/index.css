@@ -27,6 +27,7 @@
   --chat-friend: #ffffff;
   --chat-meta: #4f5b67;
   --chat-unread: #c98f00;
+  --avatar-bg: #b7c4d1;
 
   font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif;
   color: var(--text-1);
@@ -52,6 +53,7 @@
     --chat-friend: #2c333c;
     --chat-meta: #8b95a1;
     --chat-unread: #ffd43b;
+    --avatar-bg: #4b5561;
   }
 }
 
@@ -838,9 +840,22 @@ img {
   flex-shrink: 0;
   width: 30px;
   height: 30px;
-  padding: 3px;
   border-radius: 11px;
-  background: var(--chat-friend);
+}
+
+/* 사진이 없을 때: 회색 바탕에 흰 사람 실루엣 */
+.default-avatar {
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  padding: 0;
+  background: var(--avatar-bg);
+  color: #ffffff;
+}
+
+.default-avatar svg {
+  width: 82%;
+  height: 82%;
 }
 
 /* 사용자가 고른 사진은 꽉 채운다(기본 그림은 여백을 둔다). 개별 아바타 규칙보다 이기도록 img까지 붙인다. */
@@ -871,7 +886,7 @@ img.is-photo {
   color: var(--text-1);
 }
 
-/* 오른쪽에서 열리는 서랍 */
+/* 오른쪽에서 열리는 채팅방 서랍 */
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -891,11 +906,11 @@ img.is-photo {
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(300px, 78%);
+  width: min(300px, 80%);
   display: flex;
   flex-direction: column;
-  padding: max(24px, env(safe-area-inset-top)) 20px 20px;
   background: var(--card);
+  text-align: left;
   animation: slide-in 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
@@ -905,47 +920,137 @@ img.is-photo {
   }
 }
 
-.drawer-friend {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0 20px;
-  border-bottom: 1px solid var(--line);
-}
-
-.drawer-photo {
-  width: 72px;
-  height: 72px;
-  padding: 10px;
-  border-radius: 26px;
-  background: var(--bg);
-}
-
-.drawer-name {
-  font-size: 17px;
+.drawer-title {
+  margin: 0;
+  padding: max(20px, env(safe-area-inset-top)) 20px 16px;
+  font-size: 18px;
   font-weight: 700;
 }
 
-.drawer-item {
+.drawer-section {
+  padding: 16px 20px 8px;
+  border-top: 8px solid var(--bg);
+}
+
+.drawer-label {
+  margin: 0 0 6px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.drawer-label span {
+  color: var(--text-3);
+}
+
+.member {
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  padding: 8px 0;
+  text-align: left;
+}
+
+.member-photo {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+}
+
+.member-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 16px;
   font-weight: 600;
 }
 
-.drawer-item.danger {
-  color: var(--danger);
-}
-
-.drawer-hint {
+.member-action {
   color: var(--text-3);
   font-size: 13px;
   font-weight: 500;
+}
+
+.member-badge {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--text-2);
+  color: var(--card);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.drawer-bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px max(6px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.drawer-icon-button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+}
+
+/* 확인 창 */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  animation: fade-in 0.15s ease-out both;
+}
+
+.dialog {
+  width: min(300px, 100%);
+  padding: 22px 16px 16px;
+  border-radius: 18px;
+  background: var(--card);
+  text-align: center;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.dialog-body {
+  margin: 8px 0 18px;
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dialog-actions button {
+  height: 48px;
+  border-radius: 12px;
+  background: var(--bg);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dialog-actions .dialog-confirm {
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .chat-list {
@@ -954,7 +1059,12 @@ img.is-photo {
   padding: 8px 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 9px;
+}
+
+/* 말하는 사람이 바뀌면 한 번 더 띄운다 */
+.msg.turn {
+  margin-top: 9px;
 }
 
 .msg {
@@ -967,16 +1077,16 @@ img.is-photo {
   justify-content: flex-end;
 }
 
+/* 친구 말풍선 꼬리(7px)가 프로필 사진에 붙지 않게 */
+.msg.friend {
+  gap: 14px;
+}
+
 .msg-avatar {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  padding: 5px;
   border-radius: 15px;
-}
-
-img.msg-avatar {
-  background: var(--chat-friend);
 }
 
 .msg-body {
@@ -1004,6 +1114,7 @@ img.msg-avatar {
 }
 
 .bubble {
+  position: relative;
   margin: 0;
   padding: 9px 12px;
   border-radius: 16px;
@@ -1015,14 +1126,37 @@ img.msg-avatar {
   overflow-wrap: anywhere;
 }
 
-.msg.friend .bubble {
-  border-top-left-radius: 4px;
-}
-
 .msg.me .bubble {
-  border-top-right-radius: 4px;
   background: var(--chat-me);
   color: #191f28;
+}
+
+/* 말풍선 꼬리: 연달아 보낸 말 중 첫 말풍선에만, 바깥쪽 위로 뾰족하게 */
+.bubble.tail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 14px;
+  background: inherit;
+}
+
+.msg.friend .bubble.tail {
+  border-top-left-radius: 2px;
+}
+
+.msg.friend .bubble.tail::before {
+  left: -7px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.msg.me .bubble.tail {
+  border-top-right-radius: 2px;
+}
+
+.msg.me .bubble.tail::before {
+  right: -7px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
 }
 
 .msg-meta {
@@ -1111,14 +1245,9 @@ img.msg-avatar {
   background: var(--card);
 }
 
-.profile-photo img {
+.profile-avatar {
   width: 100%;
   height: 100%;
-  padding: 18px;
-}
-
-.profile-photo img.is-photo {
-  padding: 0;
 }
 
 .profile-name {
@@ -1377,7 +1506,8 @@ img.msg-avatar {
   .chat.shaking,
   .burst-flash,
   .drawer,
-  .drawer-backdrop {
+  .drawer-backdrop,
+  .dialog-backdrop {
     animation: none;
   }
 
