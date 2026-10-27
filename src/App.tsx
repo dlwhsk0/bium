@@ -18,6 +18,7 @@ import { Home } from './screens/Home'
 import { Mind } from './screens/Mind'
 import { Onboarding } from './screens/Onboarding'
 import { Result } from './screens/Result'
+import { Vent } from './screens/Vent'
 
 type View = { kind: 'home' } | { kind: 'result'; id: string }
 
@@ -31,6 +32,8 @@ export default function App() {
   const [editing, setEditing] = useState<{ focusId?: string } | null>(null)
   // 마음 비우기 화면. 홈과 비우는 중 어디서든 열고 돌아가면 원래 화면.
   const [mind, setMind] = useState(false)
+  // 하소연하기(톡방). 마음 비우기처럼 어디서든 열고 돌아가면 원래 화면.
+  const [vent, setVent] = useState(false)
   // 처음 연 사람에게만 소개를 보여준다. 이미 기록이 있으면 본 것으로 친다.
   const [onboarded, setOnboarded] = useState(() => loadOnboarded() || active !== null || history.length > 0)
   // 백업 저장·불러오기 결과를 홈에 한 줄로 알려준다
@@ -56,6 +59,7 @@ export default function App() {
   }
 
   if (mind) return <Mind onBack={() => setMind(false)} />
+  if (vent) return <Vent onBack={() => setVent(false)} />
 
   if (editing) {
     return (
@@ -75,6 +79,7 @@ export default function App() {
         categories={categories}
         onEditCategory={(id) => setEditing({ focusId: id })}
         onMind={() => setMind(true)}
+        onVent={() => setVent(true)}
         onToss={(c) => setActive((b) => b && toss(b, c))}
         onUndo={() => setActive((b) => b && undo(b))}
         onFinish={() => {
@@ -111,6 +116,7 @@ export default function App() {
       onIntro={() => setOnboarded(false)}
       onEditCategories={() => setEditing({})}
       onMind={() => setMind(true)}
+      onVent={() => setVent(true)}
       onExport={async () => {
         const result = await saveBackupFile(makeBackup({ categories, active, history }))
         if (result === 'shared') setNotice('백업 파일을 보냈어요. 잃어버리지 않을 곳에 두세요.')
