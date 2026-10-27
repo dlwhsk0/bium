@@ -746,6 +746,11 @@ img {
   background: #ffc531;
 }
 
+/* clay 말풍선은 그늘이 진해 노랑 위에서 회색으로 보인다 — 밝혀서 흰색으로 */
+.app-vent img {
+  filter: brightness(1.25);
+}
+
 .app-mind {
   background: #2d323b;
 }
