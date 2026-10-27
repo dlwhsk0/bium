@@ -1,4 +1,5 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import { Sheet } from '../components/Sheet'
 import { periodLabel, type Bium } from '../lib/bium'
 
 interface Props {
@@ -14,58 +15,77 @@ interface Props {
   onVent: () => void
 }
 
-export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind, onVent }: Props) {
+/** 홈에 바로 보이는 지난 비움 수. 나머지는 "모두 보기" 시트에서 — 홈이 한 화면을 넘지 않게. */
+const RECENT = 2
+
+function HistoryRow({ b, onOpen }: { b: Bium; onOpen: (id: string) => void }) {
+  return (
+    <li>
+      <button className="list-row" onClick={() => onOpen(b.id)}>
+        <span className="list-title">{b.tosses.length}개 비움</span>
+        <span className="list-sub">{periodLabel(b)}</span>
+      </button>
+    </li>
+  )
+}
+
+export function Home(props: Props) {
+  const { history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind, onVent } = props
   const fileInput = useRef<HTMLInputElement>(null)
+  const [sheet, setSheet] = useState<'settings' | 'history' | null>(null)
+  const close = () => setSheet(null)
 
   return (
     <main className="screen home">
-      <div className="scroll-area">
-        <div className="intro">
-          <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
-          <h1 className="title">비움</h1>
-          <p className="body">
-            버릴 물건을 하나씩 넣으면
-            <br />
-            며칠이 걸려도 대신 세어둘게요
-          </p>
-        </div>
+      <button className="corner-button" onClick={() => setSheet('settings')} aria-label="설정">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>
+          <path
+            d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.8 1.7 1l.4 2.5h4l.4-2.5c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.4z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
 
-        <section className="history">
-          <h2 className="caption">마음도 비워요</h2>
-          <div className="card list">
-            <button className="mind-entry" onClick={onMind}>
-              <img src="/icons/memo.png" alt="" draggable={false} />
-              <span className="mind-entry-text">
-                <span className="mind-entry-title">마음 비우기</span>
-                <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
-              </span>
-            </button>
-            <button className="mind-entry" onClick={onVent}>
-              <img src="/icons/speech.png" alt="" draggable={false} />
-              <span className="mind-entry-text">
-                <span className="mind-entry-title">하소연하기</span>
-                <span className="mind-entry-sub">친구한테 털어놓고 방을 터트려요</span>
-              </span>
-            </button>
-          </div>
-        </section>
-
-        {history.length > 0 && (
-          <section className="history">
-            <h2 className="caption">지난 비움</h2>
-            <ul className="card list">
-              {history.map((b) => (
-                <li key={b.id}>
-                  <button className="list-row" onClick={() => onOpen(b.id)}>
-                    <span className="list-title">{b.tosses.length}개 비움</span>
-                    <span className="list-sub">{periodLabel(b)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+      <div className="intro">
+        <img className="intro-icon" src="/icons/wastebasket.png" alt="" draggable={false} />
+        <h1 className="title">비움</h1>
+        <p className="body">
+          버릴 물건을 하나씩 넣으면
+          <br />
+          며칠이 걸려도 대신 세어둘게요
+        </p>
       </div>
+
+      <section className="mind-tiles" aria-label="마음도 비워요">
+        <button className="card mind-tile" onClick={onMind}>
+          <img src="/icons/memo.png" alt="" draggable={false} />
+          <span className="mind-tile-title">마음 비우기</span>
+          <span className="mind-tile-sub">적어서 구겨 버려요</span>
+        </button>
+        <button className="card mind-tile" onClick={onVent}>
+          <img src="/icons/speech.png" alt="" draggable={false} />
+          <span className="mind-tile-title">하소연하기</span>
+          <span className="mind-tile-sub">털어놓고 방을 터트려요</span>
+        </button>
+      </section>
+
+      {history.length > 0 && (
+        <section className="history">
+          <ul className="card list">
+            {history.slice(0, RECENT).map((b) => (
+              <HistoryRow key={b.id} b={b} onOpen={onOpen} />
+            ))}
+          </ul>
+          {history.length > RECENT && (
+            <button className="text-button" onClick={() => setSheet('history')}>
+              지난 비움 모두 보기 ({history.length})
+            </button>
+          )}
+        </section>
+      )}
 
       <footer className="actions">
         {notice && (
@@ -73,35 +93,56 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport, onI
             {notice}
           </p>
         )}
-        <div className="text-buttons">
-          <button className="text-button" onClick={onEditCategories}>
-            카테고리 편집
-          </button>
-          <button className="text-button" onClick={onIntro}>
-            앱 소개
-          </button>
-        </div>
-        <div className="text-buttons">
-          <button className="text-button" onClick={onExport} disabled={history.length === 0}>
-            백업 파일 저장
-          </button>
-          <button className="text-button" onClick={() => fileInput.current?.click()}>
-            백업 불러오기
-          </button>
-          <input
-            ref={fileInput}
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) onImport(file)
-              e.target.value = '' // 같은 파일을 다시 골라도 onChange가 오게
-            }}
-          />
-        </div>
-        <button className="cta" onClick={onStart}>비움 시작하기</button>
+        <button className="cta" onClick={onStart}>
+          비움 시작하기
+        </button>
       </footer>
+
+      {sheet === 'settings' && (
+        <Sheet title="설정" onClose={close}>
+          <ul className="sheet-list">
+            <li>
+              <button onClick={() => (close(), onEditCategories())}>카테고리 편집</button>
+            </li>
+            <li>
+              <button onClick={() => (close(), onIntro())}>앱 소개 다시 보기</button>
+            </li>
+            <li>
+              <button onClick={() => (close(), onExport())} disabled={history.length === 0}>
+                백업 파일 저장
+              </button>
+            </li>
+            <li>
+              <button onClick={() => fileInput.current?.click()}>백업 불러오기</button>
+            </li>
+          </ul>
+        </Sheet>
+      )}
+
+      {sheet === 'history' && (
+        <Sheet title="지난 비움" onClose={close}>
+          <ul className="list">
+            {history.map((b) => (
+              <HistoryRow key={b.id} b={b} onOpen={(id) => (close(), onOpen(id))} />
+            ))}
+          </ul>
+        </Sheet>
+      )}
+
+      <input
+        ref={fileInput}
+        type="file"
+        accept="application/json,.json"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            close()
+            onImport(file)
+          }
+          e.target.value = '' // 같은 파일을 다시 골라도 onChange가 오게
+        }}
+      />
     </main>
   )
 }

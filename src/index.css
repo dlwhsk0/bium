@@ -134,6 +134,16 @@ img {
   padding: 4px 20px;
 }
 
+.scroll-area,
+.sheet-body {
+  scrollbar-width: none;
+}
+
+.scroll-area::-webkit-scrollbar,
+.sheet-body::-webkit-scrollbar {
+  display: none;
+}
+
 .scroll-area > * {
   flex-shrink: 0;
 }
@@ -253,9 +263,9 @@ img {
 }
 
 .intro-icon {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 8px;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 4px;
 }
 
 .result .intro-icon {
@@ -447,16 +457,15 @@ img {
 
 .tile {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 16px 8px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 6px;
 }
 
 .tile img {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 6px;
+  width: 34px;
+  height: 34px;
 }
 
 .tile-label {
@@ -466,7 +475,7 @@ img {
 }
 
 .tile-count {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
 }
 
@@ -474,12 +483,12 @@ img {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 20px;
+  gap: 2px;
+  padding: 14px 20px;
 }
 
 .best-day {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -499,15 +508,15 @@ img {
 
 .edit-row {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 56px;
+  grid-template-columns: 44px minmax(0, 1fr) 56px;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 8px 0;
 }
 
 .pack-thumb {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border-radius: 14px;
@@ -520,8 +529,8 @@ img {
 }
 
 .pack-thumb img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 
 .label-input {
@@ -558,7 +567,6 @@ img {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  padding: 0 0 16px;
 }
 
 .pack-option {
@@ -596,6 +604,122 @@ img {
 
 .pack-option.selected .pack-name {
   color: var(--accent);
+}
+
+/* 화면 오른쪽 위 아이콘 버튼(홈의 설정) */
+.screen {
+  position: relative;
+}
+
+.corner-button {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+}
+
+/* 홈의 마음 비우기 / 하소연하기 타일 */
+.mind-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mind-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px;
+  transition: transform 0.15s;
+}
+
+.mind-tile:active {
+  transform: scale(0.97);
+}
+
+.mind-tile img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+}
+
+.mind-tile-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mind-tile-sub {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 아래에서 올라오는 시트 */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  animation: fade-in 0.2s ease-out both;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px max(20px, env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: var(--card);
+  animation: sheet-up 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.sheet-handle {
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin-bottom: 12px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.sheet-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sheet-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sheet-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.sheet-list button {
+  width: 100%;
+  height: 52px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 /* ── 마음 비우기 ── */
