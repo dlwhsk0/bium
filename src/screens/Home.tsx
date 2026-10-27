@@ -11,9 +11,10 @@ interface Props {
   onIntro: () => void
   onEditCategories: () => void
   onMind: () => void
+  onVent: () => void
 }
 
-export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind }: Props) {
+export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind, onVent }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
 
   return (
@@ -28,13 +29,25 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport, onI
         </p>
       </div>
 
-      <button className="card mind-entry" onClick={onMind}>
-        <img src="/icons/memo.png" alt="" draggable={false} />
-        <span className="mind-entry-text">
-          <span className="mind-entry-title">마음 비우기</span>
-          <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
-        </span>
-      </button>
+      <section className="history">
+        <h2 className="caption">마음도 비워요</h2>
+        <div className="card list">
+          <button className="mind-entry" onClick={onMind}>
+            <img src="/icons/memo.png" alt="" draggable={false} />
+            <span className="mind-entry-text">
+              <span className="mind-entry-title">마음 비우기</span>
+              <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
+            </span>
+          </button>
+          <button className="mind-entry" onClick={onVent}>
+            <img src="/icons/speech.png" alt="" draggable={false} />
+            <span className="mind-entry-text">
+              <span className="mind-entry-title">하소연하기</span>
+              <span className="mind-entry-sub">친구한테 털어놓고 방을 터트려요</span>
+            </span>
+          </button>
+        </div>
+      </section>
 
       {history.length > 0 && (
         <section className="history">

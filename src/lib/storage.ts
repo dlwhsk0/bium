@@ -53,3 +53,9 @@ const MIND_COUNT_KEY = 'bium:mind-count'
 /** 마음 비우기로 버린 종이 수. 적은 내용은 어디에도 저장하지 않고 개수만 센다. */
 export const loadMindCount = () => read<number>(MIND_COUNT_KEY, 0)
 export const saveMindCount = (n: number) => write(MIND_COUNT_KEY, n)
+
+const BURST_COUNT_KEY = 'bium:burst-count'
+
+/** 하소연하기에서 터트린 방 수. 대화 내용은 저장하지 않는다. */
+export const loadBurstCount = () => read<number>(BURST_COUNT_KEY, 0)
+export const saveBurstCount = (n: number) => write(BURST_COUNT_KEY, n)

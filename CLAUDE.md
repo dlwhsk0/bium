@@ -45,10 +45,11 @@
 - `src/lib/categories.ts` — 사용자 카테고리 `{ id, label, pack, hidden? }`. 기본 4개의 id는 예전 고정 키(clothes 등)와 같아 옛 기록이 이어진다. 삭제는 `hidden`(지난 기록 표시용). 2~6개, 이름 8자
 - `src/lib/date.ts` — 날짜 키·일수(시작일 포함)·표기
 - `src/lib/backup.ts` — 백업 파일 만들기(`makeBackup`)·검증(`parseBackup`, 깨진 파일은 한국어 문장으로 Error)·합치기(`mergeBackup`, 같은 id는 건너뛰어 여러 번 불러와도 안전)·저장(`saveBackupFile`, 폰은 공유 시트, 그 외 다운로드)
-- `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순), `bium:categories`, `bium:onboarded`, `bium:mind-count`. 저장이 막혀도 앱은 동작
+- `src/lib/storage.ts` — localStorage `bium:active`(진행 중 1개), `bium:history`(끝난 비움, 최신순), `bium:categories`, `bium:onboarded`, `bium:mind-count`, `bium:burst-count`. 저장이 막혀도 앱은 동작
 - `src/components/Bin.tsx` — 분류 카드 하나(누르면 넣기). 벽돌 쌓기 배치(`slot`) + 위치·기울기 흔들림은 `seeded(at)`. `animateAfter` 이후에 넣은 것만 떨어지는 애니메이션(처음 열 때 다 떨어지지 않게)
 - `src/screens/Onboarding.tsx` — 처음 열면 나오는 소개 5장(공감, 휴지 하나부터, 하나씩 금방, 직접 눌러보기, 응원). 좌우로 밀어 넘김. 마지막 버튼은 바로 비움 시작. 기록이 이미 있으면 안 나오고(`bium:onboarded`), 홈의 "앱 소개"로 다시 볼 수 있다
 - `src/screens/Mind.tsx` — 마음 비우기(부가 기능). 종이에 적고 "구겨서 버리기" → 종이가 구겨져(clip-path 16꼭짓점 변형 + 주름 오버레이) 공이 되고 포물선으로 쓰레기통에 들어감. **적은 내용은 저장하지 않고** 버린 개수만(`bium:mind-count`). 단계 전환은 animationend 대신 타이머(CSS 길이와 맞춤). 홈 카드와 비우는 중 화면 하단에서 연다
+- `src/screens/Vent.tsx` — 하소연하기(부가 기능). 톡방처럼 엔터로 말풍선 전송(한글 조합 중 엔터 무시, Shift+엔터 줄바꿈). 말을 멈추고 2.5초 있으면 친구 "비움이"가 입력 중 표시 후 짧게 맞장구. "터트리기"를 누르면 화면이 흔들리고 말풍선이 사방으로 튕겨 나간 뒤 "방이 터졌어요". **대화는 저장하지 않고** 터트린 방 개수만(`bium:burst-count`). 카카오 로고나 이름은 쓰지 않는다
 - `src/lib/pile.ts` — 더미 벽돌 쌓기 배치(`slot`, `ROW_H`). `Bin`과 소개 화면이 같이 쓴다
 - `src/screens/Categories.tsx` — 카테고리 편집(이름, 아이템팩 고르기, 추가, 두 번 눌러 삭제). 홈의 "카테고리 편집" 버튼, 또는 비우는 중 화면에서 **카드를 꾹 누르면**(500ms, `useLongPress`) 그 카테고리의 팩 고르기가 펼쳐진 채로 열린다. 바꿀 때마다 바로 저장
 - `src/screens/` — `Home`(시작 + 지난 비움 + 카테고리 편집·앱 소개·백업), `Active`(수거함 4개·되돌리기·비움 끝은 두 번 눌러 확정), `Result`(분류별 타일·가장 많이 치운 날 + 기록 삭제)
@@ -83,6 +84,7 @@ pnpm 10.15가 rolldown/oxlint의 optional 네이티브 바이너리 설치를 �
 - [x] 단계 8: 처음 소개(온보딩) 5장 — 바쁜 학생·직장인, 휴지 하나부터, 하나씩 금방, 재미, 응원
 - [x] 단계 9: 카테고리 편집 + 아이템팩 11종 + 백업 v2
 - [x] 단계 10: 마음 비우기 — 적은 생각을 구겨서 쓰레기통에
+- [x] 단계 11: 하소연하기 — 톡방에 털어놓고 방 터트리기
 
 ## 컨벤션
 - 커밋 메시지: 한국어, 의미 단위. 배포는 `ship` 스킬 사용.
