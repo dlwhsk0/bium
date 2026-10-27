@@ -13,6 +13,7 @@ import {
   type Friend,
   type VentMessage,
 } from '../lib/storage'
+import { buzz } from '../lib/haptics'
 
 interface Props {
   onBack: () => void
@@ -36,11 +37,15 @@ const IGNORE_CHANCE = 0.1
 // 그때는 IDLE_REPLY_CHANCE로 답하고, 아니면 읽기만 한다.
 const IDLE_MS: [number, number] = [4000, 8000]
 const IDLE_REPLY_CHANCE = 0.6
-// 내 말에 이런 말이 들어가면(띄어쓰기 무시) 무조건 빨리 읽고 아니라고 해명한다
-const NUDGE_WORDS = ['읽씹', '왜안읽어', '빨리읽어']
-const isNudge = (text: string) => {
+// 내 말에 이런 말이 들어가면(띄어쓰기 무시) 무조건 빨리 읽고 바로 답한다.
+// 읽씹 재촉엔 해명(DENIALS), 답장 재촉엔 답장(ANSWERS).
+const NUDGES: { words: string[]; replies: () => string[] }[] = [
+  { words: ['읽씹', '왜안읽어', '빨리읽어'], replies: () => DENIALS },
+  { words: ['답장해', '답장좀'], replies: () => ANSWERS },
+]
+const nudgeReplies = (text: string) => {
   const compact = text.replace(/\s+/g, '')
-  return NUDGE_WORDS.some((w) => compact.includes(w))
+  return NUDGES.find((n) => n.words.some((w) => compact.includes(w)))?.replies() ?? null
 }
 const DENY_READ_MS: [number, number] = [300, 900]
 // 안정형 말투로 차분하게. 문구 안의 줄바꿈(\n)은 다음 말풍선으로 나눠 보낸다.
@@ -52,6 +57,14 @@ const DENIALS = [
   'ㄴㄴ 미친놈들이네 걔네\n그래서 어떻게 됐어?',
   '아니 읽씹 아님',
 ]
+// '답장해', '답장좀'에 바로 하는 답. 안정형 말투.
+const ANSWERS = [
+  '응응 나 여기 있어',
+  '응응 나 여기 있어\n계속 말해',
+  '미안 ㅠ 듣고 있었어',
+  '답장 왔다 ㅋㅋ\n다 듣고 있어',
+  '아 미안 바로 답장할게\n그래서 어떻게 됐어?',
+]
 // 2차 말풍선은 1차 뒤 이 사이에 이어서 온다
 const NEXT_BUBBLE_MS: [number, number] = [400, 700]
 const READ_MS: [number, number] = [400, 2000]
@@ -61,7 +74,7 @@ const between = ([min, max]: [number, number]) => min + Math.random() * (max - m
 const rollReply = () => Math.random() < REPLY_CHANCE
 const rollIgnore = () => Math.random() < IGNORE_CHANCE
 const rollIdleReply = () => Math.random() < IDLE_REPLY_CHANCE
-const pickDenial = () => DENIALS[Math.floor(Math.random() * DENIALS.length)]
+const pickFrom = (list: string[]) => list[Math.floor(Math.random() * list.length)]
 
 const markRead = (m: VentMessage): VentMessage => (m.from === 'me' && !m.read ? { ...m, read: true } : m)
 
@@ -328,10 +341,11 @@ export function Vent({ onBack }: Props) {
     if (idleTimer.current !== null) clearTimeout(idleTimer.current)
     idleTimer.current = null
 
-    // '읽씹', '왜 안 읽어', '빨리 읽어'면 무조건 빨리 읽고 아니라고 한다(조용히 들어주는 중이어도)
-    if (isNudge(text)) {
+    // 읽씹·답장 재촉이면 무조건 빨리 읽고 바로 답한다(조용히 들어주는 중이어도)
+    const nudge = nudgeReplies(text)
+    if (nudge) {
       wantsReply.current = true
-      replyText.current = pickDenial()
+      replyText.current = pickFrom(nudge)
       sinceReply.current = 0
       if (readTimer.current !== null) clearTimeout(readTimer.current)
       readTimer.current = window.setTimeout(friendReads, between(DENY_READ_MS))
@@ -377,7 +391,7 @@ export function Vent({ onBack }: Props) {
     if (phase !== 'chatting') return
     stopFriend()
     ;(document.activeElement as HTMLElement | null)?.blur()
-    navigator.vibrate?.([30, 30, 60])
+    buzz([30, 30, 60])
     setPhase('bursting')
     burstTimer.current = window.setTimeout(() => {
       setMessages([]) // 했던 말은 여기서 사라진다

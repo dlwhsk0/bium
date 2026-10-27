@@ -1,4 +1,5 @@
 import { useRef, type PointerEvent } from 'react'
+import { buzz } from './haptics'
 
 const HOLD_MS = 500
 /** 이만큼 움직이면 스크롤로 보고 꾹 누르기를 취소한다 */
@@ -26,7 +27,7 @@ export function useLongPress(onClick: () => void, onLongPress: () => void) {
       timer.current = window.setTimeout(() => {
         fired.current = true
         timer.current = null
-        navigator.vibrate?.(20)
+        buzz(20)
         onLongPress()
       }, HOLD_MS)
     },

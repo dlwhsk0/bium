@@ -5,8 +5,17 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#101013" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f4f6" />
+    <script>
+      // 첫 화면이 그려지기 전에 테마를 정해 깜빡임을 막는다(App.tsx의 테마 로직과 같게)
+      try {
+        var t = (JSON.parse(localStorage.getItem('bium:settings')) || {}).theme || 'system'
+        if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#101013')
+        }
+      } catch (e) {}
+    </script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="비움" />

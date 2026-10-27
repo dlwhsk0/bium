@@ -1,4 +1,6 @@
 import type { Bium } from './bium'
+import { detectedPlatform, type Platform } from './platform'
+import { isWallpaperId, type WallpaperId } from './wallpapers'
 import { DEFAULT_CATEGORIES, MIN_CATEGORIES, readCategory, visibleCategories, type Category } from './categories'
 
 const ACTIVE_KEY = 'bium:active'
@@ -107,3 +109,55 @@ export function loadVentChat(): VentChat | null {
   return { openedAt: raw.openedAt, messages }
 }
 export const saveVentChat = (chat: VentChat | null) => write(VENT_CHAT_KEY, chat)
+
+const SETTINGS_KEY = 'bium:settings'
+const WALLPAPER_PHOTO_KEY = 'bium:wallpaper-photo'
+
+/** 설정 앱: 화면 모양, 테마, 배경화면, 시계, 위젯, 진동 */
+export type ThemeMode = 'system' | 'light' | 'dark'
+export interface Settings {
+  platform: Platform
+  theme: ThemeMode
+  wallpaper: WallpaperId
+  /** 24시간제(끄면 오전/오후 12시간제) */
+  clock24: boolean
+  /** 홈 화면 비움 위젯 보이기 */
+  widget: boolean
+  /** 비움 위젯 크기: 크게(칸마다 큰 아이콘과 숫자) / 작게(한 줄) */
+  widgetSize: 'large' | 'small'
+  /** 앱 안의 진동 */
+  haptics: boolean
+}
+
+const defaultSettings = (): Settings => ({
+  platform: detectedPlatform,
+  theme: 'system',
+  wallpaper: detectedPlatform === 'android' ? 'mint' : 'lavender',
+  clock24: true,
+  widget: true,
+  widgetSize: 'large',
+  haptics: true,
+})
+const bool = (v: unknown, fallback: boolean) => (typeof v === 'boolean' ? v : fallback)
+
+export function loadSettings(): Settings {
+  const raw = read<Partial<Settings> | null>(SETTINGS_KEY, null)
+  const d = defaultSettings()
+  return {
+    platform: raw?.platform === 'ios' || raw?.platform === 'android' ? raw.platform : d.platform,
+    theme: raw?.theme === 'light' || raw?.theme === 'dark' || raw?.theme === 'system' ? raw.theme : d.theme,
+    wallpaper: isWallpaperId(raw?.wallpaper) ? raw.wallpaper : d.wallpaper,
+    clock24: bool(raw?.clock24, d.clock24),
+    widget: bool(raw?.widget, d.widget),
+    widgetSize: raw?.widgetSize === 'small' || raw?.widgetSize === 'large' ? raw.widgetSize : d.widgetSize,
+    haptics: bool(raw?.haptics, d.haptics),
+  }
+}
+export const saveSettings = (s: Settings) => write(SETTINGS_KEY, s)
+
+/** 배경화면으로 고른 사진(작게 줄인 JPEG data URL). 설정과 따로 둬서 설정 읽기가 가볍게. */
+export const loadWallpaperPhoto = () => {
+  const v = read<string | null>(WALLPAPER_PHOTO_KEY, null)
+  return typeof v === 'string' && v.startsWith('data:image/') ? v : null
+}
+export const saveWallpaperPhoto = (data: string | null) => write(WALLPAPER_PHOTO_KEY, data)

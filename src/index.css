@@ -32,29 +32,28 @@
   font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif;
   color: var(--text-1);
   background: var(--bg);
-  color-scheme: light dark;
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   word-break: keep-all;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #101013;
-    --card: #1c1c21;
-    --card-pressed: #24242a;
-    --text-1: #f2f4f6;
-    --text-2: #b0b8c1;
-    --text-3: #6b7684;
-    --line: #2a2a31;
-    --accent: #3d86ff;
-    --danger: #ff5c69;
-    --chat-bg: #1f262e;
-    --chat-friend: #2c333c;
-    --chat-meta: #8b95a1;
-    --chat-unread: #ffd43b;
-    --avatar-bg: #4b5561;
-  }
+:root.dark {
+  color-scheme: dark;
+  --bg: #101013;
+  --card: #1c1c21;
+  --card-pressed: #24242a;
+  --text-1: #f2f4f6;
+  --text-2: #b0b8c1;
+  --text-3: #6b7684;
+  --line: #2a2a31;
+  --accent: #3d86ff;
+  --danger: #ff5c69;
+  --chat-bg: #1f262e;
+  --chat-friend: #2c333c;
+  --chat-meta: #8b95a1;
+  --chat-unread: #ffd43b;
+  --avatar-bg: #4b5561;
 }
 
 * {
@@ -638,21 +637,8 @@ img {
   /* 넓은 화면에서도 휴대폰 폭(480px)만큼만 쓴다 */
   padding: max(32px, env(safe-area-inset-top)) max(24px, calc((100% - 432px) / 2)) max(24px, env(safe-area-inset-bottom));
   color: #ffffff;
-  background: linear-gradient(170deg, #9bb5f6 0%, #c3b4ee 55%, #efc4d6 100%);
-}
-
-.launcher.android {
-  background: linear-gradient(180deg, #a9d3bc 0%, #6fa98b 100%);
-}
-
-@media (prefers-color-scheme: dark) {
-  .launcher {
-    background: linear-gradient(170deg, #1d2645 0%, #34295a 60%, #4a2c47 100%);
-  }
-
-  .launcher.android {
-    background: linear-gradient(180deg, #1c2a24 0%, #2d4639 100%);
-  }
+  /* 배경화면은 설정에서 고른 것을 인라인 style로 (lib/wallpapers.ts) */
+  background: #8a93a6;
 }
 
 .widget p {
@@ -755,6 +741,10 @@ img {
   background: #2d323b;
 }
 
+.app-settings {
+  background: #8e959f;
+}
+
 .app-name {
   font-size: 12px;
   font-weight: 500;
@@ -780,10 +770,8 @@ img {
   color: var(--text-1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .launcher.android .bium-widget {
-    background: rgba(32, 36, 40, 0.9);
-  }
+.dark .launcher.android .bium-widget {
+  background: rgba(32, 36, 40, 0.9);
 }
 
 .bium-widget-head {
@@ -828,10 +816,8 @@ img {
   background: rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  .launcher.android .bium-widget-cell {
-    background: rgba(255, 255, 255, 0.07);
-  }
+.dark .launcher.android .bium-widget-cell {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .bium-widget-cell:active {
@@ -868,6 +854,31 @@ img {
   font-size: 22px;
   font-weight: 800;
   line-height: 1.2;
+}
+
+/* 작은 위젯: 칸을 한 줄(아이콘, 이름, 숫자)로 */
+.bium-widget.small .bium-widget-cell {
+  flex-direction: row;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+.bium-widget.small .bium-widget-cell img {
+  width: 26px;
+  height: 26px;
+  margin: 0;
+}
+
+.bium-widget.small .bium-widget-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  text-align: left;
+}
+
+.bium-widget.small .bium-widget-count {
+  font-size: 15px;
 }
 
 /* 앱 창: 누른 아이콘 자리에서 커지며 열린다 */
@@ -947,6 +958,36 @@ img {
   height: 52px;
   font-size: 16px;
   font-weight: 600;
+}
+
+.sheet-list button.danger {
+  color: var(--danger);
+}
+
+/* 시트 안에서 하나 고르기: 고른 것은 파란 글씨와 체크 */
+.sheet-list .choice {
+  height: auto;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.sheet-list .choice.on {
+  color: var(--accent);
+}
+
+.sheet-list .choice.on > span:first-child::after {
+  content: ' ✓';
+}
+
+.choice-sub {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ── 마음 비우기 ── */
@@ -1188,7 +1229,7 @@ img {
 /* 사진이 없을 때: 회색 바탕에 흰 사람 실루엣 */
 .default-avatar {
   display: grid;
-  place-items: end center;
+  place-items: center;
   overflow: hidden;
   padding: 0;
   background: var(--avatar-bg);
@@ -1196,8 +1237,8 @@ img {
 }
 
 .default-avatar svg {
-  width: 82%;
-  height: 82%;
+  width: 70%;
+  height: 70%;
 }
 
 /* 사용자가 고른 사진은 꽉 채운다(기본 그림은 여백을 둔다). 개별 아바타 규칙보다 이기도록 img까지 붙인다. */
@@ -1668,6 +1709,386 @@ img.is-photo {
   }
 }
 
+/* ── 설정 앱: 실제 폰 설정처럼 목록. 아이폰/안드로이드 모양 따로 ── */
+.settings {
+  gap: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.set-bar {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: max(6px, env(safe-area-inset-top)) 8px 6px;
+}
+
+.set-back {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 8px 0 4px;
+  color: var(--accent);
+  font-size: 17px;
+}
+
+.set-bar-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.settings.ios .set-bar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.settings.ios .set-bar.main .set-bar-title {
+  display: none; /* 메인은 큰 제목을 쓴다 */
+}
+
+.set-large-title {
+  margin: 0;
+  padding: 0 20px 8px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.set-body {
+  margin: 0;
+  padding: 4px 16px max(24px, env(safe-area-inset-bottom));
+  gap: 22px;
+}
+
+.set-group-title {
+  margin: 0 0 6px;
+  padding: 0 16px;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.set-group-footer {
+  margin: 6px 0 0;
+  padding: 0 16px;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.set-group-body {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.set-row {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: var(--text-1);
+  text-align: left;
+}
+
+.set-group-body > .set-row + .set-row {
+  border-top: 1px solid var(--line);
+}
+
+.set-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.set-row-label {
+  font-size: 16px;
+}
+
+.set-row-value {
+  color: var(--text-3);
+  font-size: 15px;
+}
+
+.set-chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+  opacity: 0.6;
+}
+
+.set-check {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+/* 아이폰 스위치: 초록 */
+.set-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: var(--line);
+  transition: background-color 0.2s;
+}
+
+.set-switch.on {
+  background: #34c759;
+}
+
+.set-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.set-switch.on .set-switch-knob {
+  transform: translateX(20px);
+}
+
+/* 안드로이드: 카드 없이 넓은 목록, 파란 섹션 제목, 값은 제목 아래 */
+.settings.android .set-bar {
+  gap: 8px;
+  padding-left: 4px;
+}
+
+.settings.android .set-bar-title {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.settings.android .set-back {
+  color: var(--text-1);
+}
+
+.settings.android .set-body {
+  padding: 0 0 24px;
+  gap: 8px;
+}
+
+.settings.android .set-group-title {
+  margin: 16px 0 4px;
+  padding: 0 20px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settings.android .set-group-body {
+  border-radius: 0;
+  background: transparent;
+}
+
+.settings.android .set-group-body > .set-row + .set-row {
+  border-top: 0;
+}
+
+.settings.android .set-row {
+  min-height: 64px;
+  padding: 12px 20px;
+}
+
+.settings.android .set-row-text {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.settings.android .set-row-label {
+  font-size: 17px;
+}
+
+.settings.android .set-row-value {
+  font-size: 14px;
+}
+
+.settings.android .set-chevron {
+  display: none;
+}
+
+.settings.android .set-group-footer {
+  padding: 0 20px;
+}
+
+/* 안드로이드 스위치: 머티리얼 */
+.settings.android .set-switch {
+  width: 52px;
+  height: 32px;
+  border: 2px solid var(--text-3);
+  background: var(--card);
+}
+
+.settings.android .set-switch-knob {
+  top: 6px;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-3);
+  box-shadow: none;
+  transition:
+    transform 0.2s,
+    width 0.2s,
+    height 0.2s;
+}
+
+.settings.android .set-switch.on {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.settings.android .set-switch.on .set-switch-knob {
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  transform: translateX(20px);
+}
+
+/* 배경화면 고르기 */
+.wall-preview {
+  align-self: center;
+  width: 92px;
+  aspect-ratio: 9 / 19;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 28%;
+  border: 3px solid var(--text-1);
+  border-radius: 18px;
+}
+
+.wall-preview-icons {
+  display: grid;
+  grid-template-columns: repeat(4, 12px);
+  gap: 6px;
+  height: 12px;
+}
+
+.wall-preview-icons i {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.wall-preview-icons.android i {
+  border-radius: 50%;
+}
+
+.wall-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px 8px;
+  padding: 12px;
+}
+
+.settings.android .wall-grid {
+  padding: 8px 20px;
+}
+
+.wall-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wall-swatch-color {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.wall-swatch.selected .wall-swatch-color {
+  box-shadow:
+    0 0 0 3px var(--card),
+    0 0 0 5px var(--accent);
+}
+
+.wall-swatch-name {
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.wall-swatch.selected .wall-swatch-name {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 사진 자르기 */
+.cropper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 20px max(16px, env(safe-area-inset-bottom));
+}
+
+.cropper-hint {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  text-align: center;
+}
+
+.cropper-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #000000;
+  touch-action: none; /* 끌기와 두 손가락 확대를 직접 처리 */
+  cursor: grab;
+}
+
+.cropper-frame img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cropper-zoom {
+  width: min(280px, 100%);
+  accent-color: var(--accent);
+}
+
+.cropper-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 시계 12시간제의 오전/오후 */
+.widget-ampm {
+  margin-right: 6px;
+  font-size: 0.5em;
+  font-weight: 600;
+}
+
 /* ── 처음 소개 ── */
 .ob-top {
   display: flex;
@@ -1899,5 +2320,39 @@ img.is-photo {
   .item.vanishing,
   .bin-count.bump {
     animation-duration: 0.01s;
+  }
+}
+
+/* 키 작은 화면: 설정을 한 화면에 — 배경화면 미리보기 숨기고, 제목·줄·견본을 줄인다 */
+@media (max-height: 720px) {
+  .wall-preview {
+    display: none;
+  }
+
+  .set-large-title {
+    font-size: 28px;
+    padding-bottom: 2px;
+  }
+
+  .set-body {
+    gap: 14px;
+  }
+
+  .settings.android .set-row {
+    min-height: 54px;
+    padding: 8px 20px;
+  }
+
+  .settings.android .set-group-title {
+    margin-top: 8px;
+  }
+
+  .wall-grid {
+    gap: 8px 6px;
+    padding: 10px;
+  }
+
+  .wall-swatch-color {
+    aspect-ratio: 1 / 1;
   }
 }

@@ -10,7 +10,7 @@ import {
   visibleCategories,
   type Category,
 } from '../lib/categories'
-import { PACKS, getPack, iconUrl, type PackKey } from '../lib/packs'
+import { coverUrl, getPack, iconUrl, type PackKey, PACKS, previewIcons } from '../lib/packs'
 import { useTwoStep } from '../lib/useTwoStep'
 import { Sheet } from '../components/Sheet'
 
@@ -80,7 +80,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
                   aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
                   aria-haspopup="dialog"
                 >
-                  <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
+                  <img src={coverUrl(c.pack)} alt="" draggable={false} />
                 </button>
                 <input
                   className="label-input"
@@ -117,7 +117,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
                 onClick={() => choosePack(pickingCategory, p.key)}
               >
                 <span className="pack-icons">
-                  {p.icons.slice(0, 3).map((slug) => (
+                  {previewIcons(p.key).map((slug) => (
                     <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
                   ))}
                 </span>

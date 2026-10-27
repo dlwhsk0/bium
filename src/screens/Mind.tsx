@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { BackButton } from '../components/BackButton'
 import { loadMindCount, saveMindCount } from '../lib/storage'
+import { buzz } from '../lib/haptics'
 
 interface Props {
   onBack: () => void
@@ -50,7 +51,7 @@ export function Mind({ onBack }: Props) {
   }
 
   function landed() {
-    navigator.vibrate?.([12, 40, 12])
+    buzz([12, 40, 12])
     setCount((c) => {
       saveMindCount(c + 1)
       return c + 1

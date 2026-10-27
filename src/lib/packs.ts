@@ -1,4 +1,4 @@
-// 아이템팩: 카테고리 카드에 쌓이는 3D 아이콘 묶음. 첫 아이콘이 팩의 대표 그림이라 팩끼리 겹치지 않게 둔다.
+// 아이템팩: 카테고리 카드에 쌓이는 3D 아이콘 묶음. 첫 아이콘(또는 COVERS)이 팩의 대표 그림이라 팩끼리 겹치지 않게 둔다.
 // 아이콘: Microsoft Fluent Emoji 3D (MIT) — public/icons/<slug>.png
 export const PACKS = [
   { key: 'clothes', name: '옷', icons: ['tshirt', 'jeans', 'socks', 'coat', 'dress', 'cap', 'shoe', 'scarf'] },
@@ -41,6 +41,20 @@ export function getPack(key: PackKey) {
 }
 
 export const iconUrl = (slug: string) => `/icons/${slug}.png`
+
+// 대표 그림을 첫 아이콘과 다르게 두고 싶은 팩. 팩 안 아이콘 순서를 바꾸면 이미 쌓인 더미 그림이 바뀌므로
+// 대표만 따로 정한다.
+const COVERS: Partial<Record<PackKey, string>> = { cosmetics: 'lotion' }
+
+/** 팩의 대표 그림(카테고리 썸네일, 위젯, 통계 타일) */
+export const coverUrl = (key: PackKey) => iconUrl(COVERS[key] ?? getPack(key).icons[0])
+
+/** 팩 고르기에서 미리 보여줄 아이콘 3개(대표 그림이 맨 앞) */
+export function previewIcons(key: PackKey): string[] {
+  const cover = COVERS[key]
+  const icons: readonly string[] = getPack(key).icons
+  return (cover ? [cover, ...icons.filter((i) => i !== cover)] : [...icons]).slice(0, 3)
+}
 
 /** 0 이상 1 미만의 결정적 난수. 같은 seed면 늘 같은 값이라 새로고침해도 더미 모양이 그대로다. */
 export function seeded(seed: number): number {

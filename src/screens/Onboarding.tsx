@@ -4,6 +4,7 @@ import { DEFAULT_CATEGORIES } from '../lib/categories'
 import { iconFor, seeded } from '../lib/packs'
 import { Bin } from '../components/Bin'
 import { ROW_H, slot } from '../lib/pile'
+import { buzz } from '../lib/haptics'
 
 interface Props {
   /** 마지막 장의 버튼: 바로 비움을 시작한다 */
@@ -97,7 +98,7 @@ function TryIt() {
           animateAfter={openedAt}
           onToss={() => {
             setTosses((t) => [...t, { category: 'trash', at: Date.now() }])
-            navigator.vibrate?.(12)
+            buzz(12)
           }}
         />
       </div>
