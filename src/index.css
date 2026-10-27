@@ -26,6 +26,7 @@
   --chat-me: #ffe74c;
   --chat-friend: #ffffff;
   --chat-meta: #4f5b67;
+  --chat-unread: #c98f00;
 
   font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', sans-serif;
   color: var(--text-1);
@@ -50,6 +51,7 @@
     --chat-bg: #1f262e;
     --chat-friend: #2c333c;
     --chat-meta: #8b95a1;
+    --chat-unread: #ffd43b;
   }
 }
 
@@ -1023,10 +1025,28 @@ img.msg-avatar {
   color: #191f28;
 }
 
-.msg-time {
+.msg-meta {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.msg.me .msg-meta {
+  align-items: flex-end;
+}
+
+.msg-time {
   color: var(--chat-meta);
   font-size: 11px;
+}
+
+/* 안 읽음 표시: 친구가 읽으면 사라진다 */
+.msg-unread {
+  color: var(--chat-unread);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .chat-input {
