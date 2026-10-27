@@ -4,6 +4,7 @@ import {
   MAX_LABEL,
   MIN_CATEGORIES,
   addCategory,
+  labelOf,
   hideCategory,
   updateCategory,
   visibleCategories,
@@ -11,6 +12,7 @@ import {
 } from '../lib/categories'
 import { PACKS, getPack, iconUrl, type PackKey } from '../lib/packs'
 import { useTwoStep } from '../lib/useTwoStep'
+import { Sheet } from '../components/Sheet'
 
 interface Props {
   categories: Category[]
@@ -38,6 +40,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
   const visible = visibleCategories(categories)
   // 아이템팩 고르는 칸이 펼쳐진 카테고리
   const [picking, setPicking] = useState<string | null>(focusId ?? null)
+  const pickingCategory = visible.find((c) => c.id === picking)
 
   function choosePack(c: Category, pack: PackKey) {
     // 이름을 따로 안 바꿨으면(팩 이름 그대로면) 이름도 새 팩 이름으로
@@ -75,7 +78,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
                   className={picking === c.id ? 'pack-thumb open' : 'pack-thumb'}
                   onClick={() => setPicking(picking === c.id ? null : c.id)}
                   aria-label={`아이템팩 바꾸기, 지금 ${getPack(c.pack).name}`}
-                  aria-expanded={picking === c.id}
+                  aria-haspopup="dialog"
                 >
                   <img src={iconUrl(getPack(c.pack).icons[0])} alt="" draggable={false} />
                 </button>
@@ -93,27 +96,7 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
                 <DeleteButton disabled={visible.length <= MIN_CATEGORIES} onDelete={() => onChange(hideCategory(categories, c.id))} />
               </div>
 
-              {picking === c.id && (
-                <div className="pack-grid" role="radiogroup" aria-label="아이템팩">
-                  {PACKS.map((p) => (
-                    <button
-                      key={p.key}
-                      role="radio"
-                      aria-checked={p.key === c.pack}
-                      className={p.key === c.pack ? 'pack-option selected' : 'pack-option'}
-                      onClick={() => choosePack(c, p.key)}
-                    >
-                      <span className="pack-icons">
-                        {p.icons.slice(0, 3).map((slug) => (
-                          <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
-                        ))}
-                      </span>
-                      <span className="pack-name">{p.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </li>
+              </li>
           ))}
         </ul>
 
@@ -121,6 +104,29 @@ export function Categories({ categories, onChange, onDone, focusId }: Props) {
           {visible.length >= MAX_CATEGORIES ? `카테고리는 ${MAX_CATEGORIES}개까지예요` : '카테고리 추가'}
         </button>
       </div>
+
+      {pickingCategory && (
+        <Sheet title={`${labelOf(pickingCategory)} 아이템팩`} onClose={() => setPicking(null)}>
+          <div className="pack-grid" role="radiogroup" aria-label="아이템팩">
+            {PACKS.map((p) => (
+              <button
+                key={p.key}
+                role="radio"
+                aria-checked={p.key === pickingCategory.pack}
+                className={p.key === pickingCategory.pack ? 'pack-option selected' : 'pack-option'}
+                onClick={() => choosePack(pickingCategory, p.key)}
+              >
+                <span className="pack-icons">
+                  {p.icons.slice(0, 3).map((slug) => (
+                    <img key={slug} src={iconUrl(slug)} alt="" draggable={false} />
+                  ))}
+                </span>
+                <span className="pack-name">{p.name}</span>
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
 
       <footer className="actions">
         <button className="cta" onClick={onDone}>

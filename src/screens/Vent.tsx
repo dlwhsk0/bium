@@ -31,6 +31,10 @@ const QUIET_MESSAGES = 4
 // 보낸 말의 1은 보통 친구가 답하기로 했을 때만 사라진다. 답하기로 하면 이 사이 랜덤한 때에
 // 읽고(쌓인 1이 한꺼번에 사라짐) 곧바로 답한다. 가끔은 읽기만 한다(읽씹).
 const IGNORE_CHANCE = 0.1
+// 그 자리에서 반응하지 않았는데 내가 말을 멈추면, 이만큼 지나서 결국 읽는다(1이 영영 남지 않게).
+// 그때는 IDLE_REPLY_CHANCE로 답하고, 아니면 읽기만 한다.
+const IDLE_MS: [number, number] = [4000, 8000]
+const IDLE_REPLY_CHANCE = 0.6
 // 내 말에 이런 말이 들어가면(띄어쓰기 무시) 무조건 빨리 읽고 아니라고 해명한다
 const NUDGE_WORDS = ['읽씹', '왜안읽어', '빨리읽어']
 const isNudge = (text: string) => {
@@ -55,6 +59,7 @@ const between = ([min, max]: [number, number]) => min + Math.random() * (max - m
 
 const rollReply = () => Math.random() < REPLY_CHANCE
 const rollIgnore = () => Math.random() < IGNORE_CHANCE
+const rollIdleReply = () => Math.random() < IDLE_REPLY_CHANCE
 const pickDenial = () => DENIALS[Math.floor(Math.random() * DENIALS.length)]
 
 const markRead = (m: VentMessage): VentMessage => (m.from === 'me' && !m.read ? { ...m, read: true } : m)
@@ -227,6 +232,8 @@ export function Vent({ onBack }: Props) {
   const replyText = useRef<string | null>(null)
   // 마지막 리액션(또는 방을 연 뒤)부터 내가 보낸 말 수
   const sinceReply = useRef(0)
+  // 말을 멈췄을 때 결국 읽기
+  const idleTimer = useRef<number | null>(null)
 
   const stopFriend = () => {
     if (readTimer.current !== null) clearTimeout(readTimer.current)
@@ -236,6 +243,8 @@ export function Vent({ onBack }: Props) {
     wantsReply.current = false
     replyText.current = null
     sinceReply.current = 0
+    if (idleTimer.current !== null) clearTimeout(idleTimer.current)
+    idleTimer.current = null
   }
 
   useEffect(
@@ -284,6 +293,24 @@ export function Vent({ onBack }: Props) {
     )
   }, [])
 
+  // 말을 멈춘 채 시간이 지나면 남은 말을 읽는다. 답할지 읽씹할지는 이때 정한다.
+  const readWhenIdle = useCallback(() => {
+    idleTimer.current = null
+    if (readTimer.current !== null) return
+    if (rollIdleReply()) {
+      wantsReply.current = true
+      sinceReply.current = 0
+    }
+    friendReads()
+  }, [friendReads])
+
+  // 새로고침 전에 친구가 안 읽은 말이 있었으면, 말을 멈춘 것으로 보고 이어서 읽는다(처음 열 때 한 번)
+  useEffect(() => {
+    if (saved?.messages.some((m) => m.from === 'me' && !m.read)) {
+      idleTimer.current = window.setTimeout(readWhenIdle, between(IDLE_MS))
+    }
+  }, [saved, readWhenIdle])
+
   // 새 말풍선이 생기면 맨 아래로
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight })
@@ -297,6 +324,8 @@ export function Vent({ onBack }: Props) {
     inputRef.current?.focus()
 
     sinceReply.current++
+    if (idleTimer.current !== null) clearTimeout(idleTimer.current)
+    idleTimer.current = null
 
     // '읽씹', '왜 안 읽어', '빨리 읽어'면 무조건 빨리 읽고 아니라고 한다(조용히 들어주는 중이어도)
     if (isNudge(text)) {
@@ -309,15 +338,22 @@ export function Vent({ onBack }: Props) {
     }
 
     // 이미 읽으려는 중이면 이번 말도 그때 같이 읽힌다
-    if (readTimer.current !== null || sinceReply.current <= QUIET_MESSAGES) return
-    if (rollReply()) {
-      wantsReply.current = true
-      sinceReply.current = 0
-      readTimer.current = window.setTimeout(friendReads, between(READ_MS))
-    } else if (rollIgnore()) {
-      // 읽씹: 읽기만 하고 답은 안 한다
-      readTimer.current = window.setTimeout(friendReads, between(READ_MS))
+    if (readTimer.current !== null) return
+    if (sinceReply.current > QUIET_MESSAGES) {
+      if (rollReply()) {
+        wantsReply.current = true
+        sinceReply.current = 0
+        readTimer.current = window.setTimeout(friendReads, between(READ_MS))
+        return
+      }
+      if (rollIgnore()) {
+        // 읽씹: 읽기만 하고 답은 안 한다
+        readTimer.current = window.setTimeout(friendReads, between(READ_MS))
+        return
+      }
     }
+    // 이번엔 반응하지 않았다 — 말을 멈추면 결국 읽는다
+    idleTimer.current = window.setTimeout(readWhenIdle, between(IDLE_MS))
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
