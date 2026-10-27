@@ -1,6 +1,8 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import { platform } from '../lib/platform'
-import { loadActive } from '../lib/storage'
+import { BiumWidget } from '../components/BiumWidget'
+import { startBium, toss } from '../lib/bium'
+import { loadActive, loadCategories, saveActive } from '../lib/storage'
 
 export type AppId = 'bium' | 'vent' | 'mind'
 
@@ -34,8 +36,15 @@ export function Launcher({ onOpen }: Props) {
     return () => clearInterval(t)
   }, [])
 
-  // 위젯: 비우는 중이면 개수, 아니면 한마디
-  const [active] = useState(loadActive)
+  // 비우는 중인 비움. 아래 비움 위젯에서 바로 넣으면 저장까지 해서, 비움 앱을 열면 그대로 이어진다.
+  const [active, setActive] = useState(loadActive)
+  const [categories] = useState(loadCategories)
+
+  function tossFromWidget(categoryId: string) {
+    const next = toss(active ?? startBium(), categoryId)
+    saveActive(next)
+    setActive(next)
+  }
   const date = `${now.getMonth() + 1}월 ${now.getDate()}일 ${'일월화수목금토'[now.getDay()]}요일`
 
   const open = (id: AppId) => (e: MouseEvent<HTMLButtonElement>) => {
@@ -65,6 +74,8 @@ export function Launcher({ onOpen }: Props) {
           </button>
         ))}
       </nav>
+
+      <BiumWidget active={active} categories={categories} onToss={tossFromWidget} />
     </main>
   )
 }
