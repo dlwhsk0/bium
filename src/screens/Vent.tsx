@@ -330,7 +330,6 @@ export function Vent({ onBack }: Props) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="하고 싶은 말 다 해"
           enterKeyHint="send"
           aria-label="메시지"
           readOnly={phase !== 'chatting'}
