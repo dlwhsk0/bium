@@ -10,9 +10,10 @@ interface Props {
   onImport: (file: File) => void
   onIntro: () => void
   onEditCategories: () => void
+  onMind: () => void
 }
 
-export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories }: Props) {
+export function Home({ history, onStart, onOpen, notice, onExport, onImport, onIntro, onEditCategories, onMind }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
 
   return (
@@ -26,6 +27,14 @@ export function Home({ history, onStart, onOpen, notice, onExport, onImport, onI
           며칠이 걸려도 대신 세어둘게요
         </p>
       </div>
+
+      <button className="card mind-entry" onClick={onMind}>
+        <img src="/icons/memo.png" alt="" draggable={false} />
+        <span className="mind-entry-text">
+          <span className="mind-entry-title">마음 비우기</span>
+          <span className="mind-entry-sub">버리고 싶은 생각을 적어서 구겨 버려요</span>
+        </span>
+      </button>
 
       {history.length > 0 && (
         <section className="history">

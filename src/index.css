@@ -554,6 +554,229 @@ img {
   color: var(--accent);
 }
 
+/* ── 마음 비우기 ── */
+.mind-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 20px;
+  transition: transform 0.15s;
+}
+
+.mind-entry:active {
+  transform: scale(0.98);
+}
+
+.mind-entry img {
+  width: 44px;
+  height: 44px;
+}
+
+.mind-entry-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.mind-entry-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.mind-entry-sub {
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.paper-area {
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+}
+
+.paper-flight {
+  flex: 1;
+  display: flex;
+  /* clip-path가 box-shadow를 잘라서 그림자는 바깥에서 filter로 */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+}
+
+/* 줄 쳐진 흰 종이. 다크 모드에서도 종이는 종이색. 16개 꼭짓점으로 잘라 두어 구겨질 때 모양이 이어진다. */
+.paper {
+  --flat: polygon(0% 0%, 25% 0%, 50% 0%, 75% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 75% 100%, 50% 100%, 25% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%);
+  position: relative;
+  flex: 1;
+  border-radius: 4px;
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(transparent 0 35px, #e3e8ee 35px 36px);
+  background-position: 0 20px;
+  clip-path: var(--flat);
+  animation: paper-in 0.4s ease-out both;
+}
+
+@keyframes paper-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.paper-text {
+  width: 100%;
+  height: 100%;
+  padding: 20px 20px;
+  border: 0;
+  background: transparent;
+  resize: none;
+  color: #191f28;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 36px;
+  text-align: center;
+}
+
+.paper-text::placeholder {
+  color: #b0b8c1;
+}
+
+.paper-text:focus {
+  outline: none;
+}
+
+/* 구겨진 주름: 접힌 선과 볼록한 빛, 오목한 그늘 */
+.paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 44%, rgba(0, 0, 0, 0.1) 47%, transparent 50%),
+    linear-gradient(35deg, transparent 28%, rgba(0, 0, 0, 0.09) 31%, transparent 34%),
+    linear-gradient(160deg, transparent 58%, rgba(0, 0, 0, 0.08) 61%, transparent 64%),
+    linear-gradient(75deg, transparent 66%, rgba(0, 0, 0, 0.07) 69%, transparent 72%),
+    radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.7), transparent 38%),
+    radial-gradient(circle at 70% 72%, rgba(0, 0, 0, 0.16), transparent 50%),
+    radial-gradient(circle at 20% 75%, rgba(0, 0, 0, 0.1), transparent 30%),
+    #e9edf1;
+  mix-blend-mode: multiply;
+}
+
+.paper.crumpled {
+  animation: crumple 0.9s cubic-bezier(0.5, 0, 0.3, 1) forwards;
+}
+
+.paper.crumpled::after {
+  animation: creases 0.9s ease-in forwards;
+}
+
+.paper.crumpled .paper-text {
+  animation: ink-fade 0.35s ease-in forwards;
+}
+
+@keyframes crumple {
+  0% {
+    clip-path: var(--flat);
+    transform: none;
+  }
+  30% {
+    clip-path: polygon(4% 6%, 26% 2%, 48% 9%, 77% 3%, 96% 8%, 91% 27%, 98% 52%, 92% 76%, 95% 95%, 72% 91%, 51% 97%, 24% 90%, 3% 96%, 9% 73%, 2% 49%, 8% 24%);
+    transform: scale(0.92, 0.86) rotate(-3deg);
+  }
+  55% {
+    clip-path: polygon(14% 16%, 30% 8%, 52% 18%, 70% 9%, 88% 18%, 80% 34%, 90% 52%, 81% 70%, 86% 88%, 66% 82%, 48% 92%, 30% 80%, 12% 86%, 20% 66%, 10% 48%, 19% 30%);
+    transform: scale(0.7) rotate(5deg);
+  }
+  78% {
+    clip-path: polygon(26% 18%, 40% 10%, 55% 16%, 68% 12%, 80% 24%, 80% 38%, 88% 52%, 80% 64%, 76% 80%, 62% 84%, 50% 90%, 36% 84%, 22% 78%, 18% 62%, 12% 50%, 20% 34%);
+    transform: scale(0.42) rotate(-8deg);
+  }
+  100% {
+    clip-path: polygon(30% 14%, 42% 8%, 56% 12%, 68% 10%, 80% 22%, 82% 36%, 90% 50%, 82% 64%, 78% 80%, 62% 86%, 50% 92%, 36% 86%, 22% 80%, 16% 64%, 10% 50%, 18% 34%);
+    transform: scale(0.3) rotate(12deg);
+  }
+}
+
+@keyframes creases {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ink-fade {
+  to {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+/* 구겨진 공이 포물선을 그리며 쓰레기통으로 */
+.paper-flight.flying {
+  animation: toss-arc 0.75s cubic-bezier(0.3, 0, 0.6, 1) forwards;
+}
+
+@keyframes toss-arc {
+  0% {
+    transform: translate(0, 0) rotate(0);
+  }
+  45% {
+    transform: translate(calc(var(--dx) * 0.5), calc(var(--dy) * 0.3 - 110px)) rotate(200deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) rotate(400deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+.mind-bin {
+  position: relative;
+  z-index: 2; /* 공이 통 뒤로 들어가 보이게 */
+  align-self: center;
+  width: 96px;
+  height: 96px;
+}
+
+.mind-bin.wobble {
+  animation: bin-wobble 0.45s ease-out;
+  transform-origin: 50% 100%;
+}
+
+@keyframes bin-wobble {
+  30% {
+    transform: rotate(-7deg) scaleY(0.94);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+}
+
+.mind-done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  animation: paper-in 0.4s ease-out both;
+}
+
+.mind-done-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.mind-count {
+  min-height: 22px;
+}
+
 /* ── 처음 소개 ── */
 .ob-top {
   display: flex;
@@ -729,7 +952,8 @@ img {
   .ob-thing,
   .ob-hero-icon.floating,
   .ob-shadow,
-  .ob-sparkle {
+  .ob-sparkle,
+  .mind-bin.wobble {
     animation: none;
   }
 
