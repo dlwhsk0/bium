@@ -1,6 +1,7 @@
 import { periodLabel, summarize, type Bium } from '../lib/bium'
 import { categoryOf, labelOf, type Category } from '../lib/categories'
-import { coverUrl } from '../lib/packs'
+import { coverOf } from '../lib/packs'
+import { Emoji } from '../components/Emoji'
 import { formatDayKey } from '../lib/date'
 import { useTwoStep } from '../lib/useTwoStep'
 
@@ -24,7 +25,7 @@ export function Result({ bium, categories, onClose, onDelete }: Props) {
     <main className="screen result">
       <div className="scroll-area">
         <header className="summary">
-          <img className="intro-icon" src="/icons/party.png" alt="" draggable={false} />
+          <Emoji name="party" className="intro-icon" />
           <p className="caption">{periodLabel(bium)}</p>
           <p className="big-number">
             {s.total}
@@ -37,7 +38,7 @@ export function Result({ bium, categories, onClose, onDelete }: Props) {
           <section className="card tiles">
             {shown.map((c) => (
               <div key={c.id} className="tile">
-                <img src={coverUrl(c.pack)} alt="" draggable={false} />
+                <Emoji name={coverOf(c.pack)} className="tile-icon" />
                 <span className="tile-label">{labelOf(c)}</span>
                 <span className="tile-count">{s.byCategory[c.id] ?? 0}개</span>
               </div>

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import type { Toss } from '../lib/bium'
 import { labelOf, type Category } from '../lib/categories'
 import { iconFor, seeded } from '../lib/packs'
+import { Emoji } from './Emoji'
 import { ROW_H, slot } from '../lib/pile'
 import { useLongPress } from '../lib/useLongPress'
 
@@ -49,24 +50,20 @@ export function Bin({ category, tosses, animateAfter = Infinity, onToss, onEdit 
             '--r': `${(seeded(t.at + 3) - 0.5) * 50}deg`,
           } as CSSProperties
           return (
-            <img
+            <Emoji
               key={t.at}
+              name={iconFor(category.pack, t.at)}
               className={t.at > animateAfter ? 'item falling' : 'item'}
-              src={iconFor(category.pack, t.at)}
-              alt=""
               style={style}
-              draggable={false}
             />
           )
         })}
         {overflowDrop && (
-          <img
+          <Emoji
             key={overflowDrop.at}
+            name={iconFor(category.pack, overflowDrop.at)}
             className="item vanishing"
-            src={iconFor(category.pack, overflowDrop.at)}
-            alt=""
             style={{ left: '50%', bottom: `${slot(MAX_PILE - 1).row * ROW_H}px` }}
-            draggable={false}
           />
         )}
       </span>

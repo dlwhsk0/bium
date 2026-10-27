@@ -1,5 +1,5 @@
 // 아이템팩: 카테고리 카드에 쌓이는 3D 아이콘 묶음. 첫 아이콘(또는 COVERS)이 팩의 대표 그림이라 팩끼리 겹치지 않게 둔다.
-// 아이콘: Microsoft Fluent Emoji 3D (MIT) — public/icons/<slug>.png
+// 아이콘 이름은 lib/emoji.ts의 이모지 글자로 그린다(기기 이모지)
 export const PACKS = [
   { key: 'clothes', name: '옷', icons: ['tshirt', 'jeans', 'socks', 'coat', 'dress', 'cap', 'shoe', 'scarf'] },
   { key: 'goods', name: '소품', icons: ['teddy', 'frame', 'candle', 'package', 'plant', 'books', 'clock', 'puzzle'] },
@@ -40,14 +40,12 @@ export function getPack(key: PackKey) {
   return byKey.get(key)!
 }
 
-export const iconUrl = (slug: string) => `/icons/${slug}.png`
-
 // 대표 그림을 첫 아이콘과 다르게 두고 싶은 팩. 팩 안 아이콘 순서를 바꾸면 이미 쌓인 더미 그림이 바뀌므로
 // 대표만 따로 정한다.
 const COVERS: Partial<Record<PackKey, string>> = { cosmetics: 'lotion' }
 
 /** 팩의 대표 그림(카테고리 썸네일, 위젯, 통계 타일) */
-export const coverUrl = (key: PackKey) => iconUrl(COVERS[key] ?? getPack(key).icons[0])
+export const coverOf = (key: PackKey): string => COVERS[key] ?? getPack(key).icons[0]
 
 /** 팩 고르기에서 미리 보여줄 아이콘 3개(대표 그림이 맨 앞) */
 export function previewIcons(key: PackKey): string[] {
@@ -62,8 +60,8 @@ export function seeded(seed: number): number {
   return x - Math.floor(x)
 }
 
-/** 버린 시각으로 팩 안의 아이콘을 고른다 — 저장하지 않아도 매번 같은 아이콘 */
+/** 버린 시각으로 팩 안의 아이콘 이름을 고른다 — 저장하지 않아도 매번 같은 아이콘 */
 export function iconFor(pack: PackKey, at: number): string {
   const { icons } = getPack(pack)
-  return iconUrl(icons[Math.floor(seeded(at) * icons.length)])
+  return icons[Math.floor(seeded(at) * icons.length)]
 }
